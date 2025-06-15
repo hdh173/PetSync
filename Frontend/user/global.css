@@ -1,0 +1,45 @@
+@font-face {
+      font-family: 'ZenMaruGothic';
+      src: url('/public/fonts/ZenMaruGothic-Regular.ttf') format('truetype');
+       font-display: swap;
+    }
+
+body {
+    font-family: 'Comic Neue', 'ZenMaruGothic', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+    margin: 0;
+    background: #D7CCC8;
+}
+
+.el-header {
+    /*background-color: #a1887f;*/
+    padding: 0 !important;
+}
+
+.el-menu-demo{
+    background-color: #a1887f;
+    width: 100%;
+    border-bottom: none;
+}
+
+.el-menu--horizontal>.el-menu-item:nth-child(1) {
+    margin-right: auto;
+}
+
+
+.el-menu-demo .el-menu-item {
+  transition: background-color 0.3s;
+}
+
+.el-menu-demo .el-menu-item:hover {
+  background-color: #8d6e63 !important;
+  color: #faebd7 !important;
+}
+
+.el-menu-demo .el-menu-item.is-active {
+  background-color: #6d4c41 !important;
+  color: #ffffff !important;
+}
+
+.menu-title{
+  font-weight: bold !important;
+}

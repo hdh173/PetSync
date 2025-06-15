@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8">
+    <title>Vue 3 + Element Plus 示例</title>
+    <link rel="stylesheet"
+      href="https://unpkg.com/element-plus/dist/index.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap"
+      rel="stylesheet">
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="global.css">
+    <link rel="stylesheet" href="consult.css">
+  </head>
+  <body>
+    <!-- Vue + Element Plus 控制的 Navbar -->
+    <div id="app">
+      <div class="common-layout">
+        <el-container>
+          <el-header>
+            <el-menu
+              :default-active="activeIndex"
+              class="el-menu-demo"
+              mode="horizontal"
+              text-color="#faebd7"
+              :ellipsis="false"
+              @select="handleSelect">
+              <el-menu-item index="0">
+                <h1>PetSync</h1>
+              </el-menu-item>
+              <el-menu-item v-for="(website, index) in websites.slice(1, 5)"
+                :key="website.index" :index="(index + 1).toString()"><h3
+                  class="menu-title">{{ website
+                  }}</h3></el-menu-item>
+            </el-menu>
+          </el-header>
+          <el-main>
+
+            <el-row :gutter="20">
+              <el-col :span="6">
+                <div class="service-types">
+                  <h2 class="section-title">服务类型</h2>
+                  <ul class="service-list">
+                    <li v-for="(type, index) in allServiceTypes"
+                      :key="index"
+                      :class="{ active: selectedServiceType === type }"
+                      @click="navigateToService(type)">
+                      {{ type }}
+                    </li>
+                  </ul>
+                </div>
+              </el-col>
+
+              <el-col :span="18" v-if="selectedServiceType === 'AI 咨询'">
+                <div class="main-container">
+                  <div class="custom-AIcard">
+                    <div class="card-AIheader">AI宠物师</div>
+                    <div class="card-AIbody" ref="messagesContainer">
+                      <!-- 消息区域 -->
+                      <div class="welcome-message">
+                        <div class="welcome-content">
+                          <h4>欢迎使用AI宠物咨询服务</h4>
+                          <p>嗨～我是你的 AI 宠物师，喂养、训练、照顾毛孩子的烦恼都可以找我聊聊！</p>
+                          <div class="suggestions">
+                            <button
+                              v-for="(suggestion, index) in quickSuggestions"
+                              :key="index"
+                              @click="sendQuickQuestion(suggestion)"
+                              class="suggestion-btn">
+                              {{ suggestion }}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      <div v-for="(message, index) in AIMessages" :key="index"
+                        :class="['message', message.type]">
+                        <div class="message-content">
+                          <div class="message-text">{{ message.text }}</div>
+                          <div class="message-footer">
+                            <span class="timestamp">{{
+                              formatTime(message.timestamp) }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="card-AIfooter">
+                      <div class="input-area">
+                        <input
+                          v-model="newMessage"
+                          @keyup.enter="sendAIMessage"
+                          :placeholder="isWaitingResponse ? '正在生成消息，请耐心等待...' : '向AI咨询师描述您的问题...'"
+                          class="message-input"
+                          :disabled="isWaitingResponse" />
+                        <button
+                          @click="sendAIMessage"
+                          :disabled="!newMessage.trim() || isWaitingResponse"
+                          class="send-btn"
+                          :class="{ 'loading': isWaitingResponse }">
+                          <div v-if="!isWaitingResponse">
+                            发送
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </el-col>
+
+              <el-col :span="12"
+                v-if="selectedServiceType === '线上咨询' && !onlineChat">
+                <div class="custom-online-card">
+                  <div class="card-online-header">
+                    <h3>专业宠物师</h3>
+                    <div class="search-filter">
+                      <input
+                        type="text"
+                        placeholder="搜索咨询师..."
+                        v-model="expertSearchQuery"
+                        @keyup.enter="handleFilter"
+                        @blur="handleFilter" />
+                    </div>
+                  </div>
+                  <div class="card-online-body">
+                    <div class="expert-grid">
+                      <div v-for="(expert, index) in filteredExperts"
+                        :key="index" class="expert-card">
+                        <div class="expert-image-container"
+                          @click="showExpertDetails(index)">
+                          <img :src="expert.avatar" :alt="expert.name"
+                            class="expert-image" />
+                          <!-- <div class="institution-tag">{{ expert.tags[0] }}</div> -->
+                        </div>
+                        <div class="expert-info"
+                          @click="showExpertDetails(index)">
+                          <h3>{{ expert.name }}</h3>
+                          <p class="expert-description">{{
+                            truncateDescription(expert.introduction) }}</p>
+                          <div class="expert-rating">
+                            <span class="stars">{{
+                              getRatingStars(expert.rating) }}</span>
+                            <span class="rating">{{ expert.rating }}</span>
+                          </div>
+                        </div>
+                        <button class="consult-btn"
+                          @click="goConsulting(index)">立即咨询</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </el-col>
+
+              <el-dialog
+                v-model="detailExpertVisible">
+                <div class="expert-modal-header">
+                  <img :src="detailExpert.avatar" :alt="detailExpert.name"
+                    class="modal-expert-image" />
+                  <div class="expert-title">
+                    <h2>{{ detailExpert.name }}</h2>
+                    <p>专业宠物师</p>
+                    <div class="expert-meta">
+                      <span class="meta-item">咨询量: {{
+                        detailExpert.consultations || 0 }}</span>
+                      <span class="meta-item">好评率: {{ detailExpert.rating ||
+                        '100%' }}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="expert-modal-body">
+                  <div class="expert-section">
+                    <h3>专业背景</h3>
+                    <p>{{ detailExpert.education || '' }}</p>
+                  </div>
+                  <div class="expert-section">
+                    <h3>所属医院</h3>
+                    <p>{{ detailExpert.hospital || '' }}</p>
+                  </div>
+                  <div class="expert-section">
+                    <h3>擅长领域</h3>
+                    <div class="expertise-tags">
+                      <span
+                        v-for="(tag, index) in detailExpert.specialties || []"
+                        :key="index"
+                        class="expertise-tag">
+                        {{ tag }}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="expert-section">
+                    <h3>个人简介</h3>
+                    <p>{{ detailExpert.introduction }}</p>
+                  </div>
+                </div>
+
+                <template #footer>
+                  <div class="dialog-footer">
+                    <el-button
+                      @click="detailExpertVisible = false">Cancel</el-button>
+                    <el-button class="confirm-btn"
+                      @click="detailExpertVisible = false">
+                      立即咨询
+                    </el-button>
+                  </div>
+                </template>
+              </el-dialog>
+
+              <el-col :span="6"
+                v-if="selectedServiceType === '线上咨询' && !onlineChat">
+                <div class="expert-tags">
+                  <h2 class="section-title">专家标签</h2>
+                  <div class="tags-container">
+                    <span
+                      v-for="(tag, index) in filteredTags"
+                      :key="index"
+                      :class="{ active: selectedTags.includes(tag.name) }"
+                      @click="toggleTag(tag.name)"
+                      class="tag-item">
+                      {{ tag.name }} <!-- 只显示name属性 -->
+                    </span>
+                  </div>
+                  <button class="clear-filter-btn" @click="clearFilter"
+                    :disabled="selectedTags.length === 0 && !expertSearchQuery">
+                    清除筛选
+                  </button>
+                </div>
+              </el-col>
+
+              <el-col :span="18"
+                v-if="selectedServiceType === '线上咨询' && onlineChat">
+                <div class="main-container">
+                  <div class="custom-AIcard">
+                    <div class="card-AIheader">
+                      <div class="AIheader-content">
+                        <div class="left-group">
+                          <img :src="detailExpert.avatar"
+                            :alt="detailExpert.name"
+                            class="chat-expert-image" />
+                          <h2>{{ detailExpert.name }}</h2>
+                          <span class="status-indicator">
+                            <span
+                              :class="detailExpert.online ? 'dot-online' : 'dot-offline'"></span>
+                            {{ detailExpert.online ? '在线' : '已下线' }}
+                          </span>
+                        </div>
+                        <el-button type="danger" plain
+                          @click="openEndBox">结束咨询</el-button>
+                      </div>
+                    </div>
+                    <div class="card-AIbody" ref="messagesContainer">
+                      <!-- 消息区域 -->
+                      <div v-for="(message, index) in onlineMessages"
+                        :key="index"
+                        :class="['message', message.type]">
+                        <div class="message-content">
+                          <div class="message-text">{{ message.text }}</div>
+                          <div class="message-footer">
+                            <span class="timestamp">{{
+                              formatTime(message.timestamp) }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="card-AIfooter">
+                      <div class="input-area">
+                        <input
+                          v-model="newMessage"
+                          @keyup.enter="sendOnlineMessage"
+                          placeholder="向专业宠物师描述您的问题..."
+                          class="message-input" />
+                        <button
+                          @click="sendOnlineMessage"
+                          :disabled="!newMessage.trim()"
+                          class="send-btn">
+                          <div v-if="!isWaitingResponse">
+                            发送
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </el-col>
+
+              <el-col :span="12"
+                v-if="selectedServiceType === '咨询历史'">
+                <div class="custom-online-card">
+                  <div class="card-online-header">
+                    <h3>咨询历史</h3>
+                  </div>
+                  <div class="history-list">
+                    <div v-if="loading" class="loading-state">
+                      <i class="bi bi-arrow-clockwise"></i>
+                      <p>加载中...</p>
+                    </div>
+
+                    <div v-else-if="filteredHistory.length === 0"
+                      class="empty-state">
+                      <i class="bi bi-patch-question-fill"></i>
+                      <p>暂无历史记录</p>
+                    </div>
+
+                    <div v-for="(item, index) in pagedHistory" :key="index"
+                      class="history-card">
+                      <div class="card-header">
+                        <div class="service-type-badge">
+                          {{item.type}}
+                        </div>
+                        <div class="card-date">{{ item.timestamp
+                          }}</div>
+                      </div>
+                      <h3 class="card-title">{{ item.title }}</h3>
+                      <p class="card-content">{{ item.content }}</p>
+                      <div class="card-footer">
+                        <button class="detail-btn" @click="viewDetail(item)">
+                          查看详情
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </el-col>
+
+              <el-col :span="6"
+                v-if="selectedServiceType === '咨询历史'">
+                <div class="filter-sidebar">
+                  <h2 class="section-title">筛选条件</h2>
+
+                  <div class="filter-group">
+                    <h3 class="filter-title">服务类型</h3>
+                    <ul class="filter-list">
+                      <li v-for="(filter, index) in ServiceFilters" :key="index"
+                        :class="{ active: selectedFilter === filter }"
+                        @click="selectFilter(filter)">
+                        {{ filter }}
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div class="filter-group">
+                    <h3 class="filter-title">时间范围</h3>
+                    <div class="date-range">
+                      <el-date-picker
+                        v-model="startDate"
+                        type="date"
+                        placeholder="请选择开始时间"
+                        :disabled-date="disabledDate"
+                        :shortcuts="shortcuts"
+                        :size="size" />
+                    </div>
+                    <br>
+                    <div style="text-align: center;">至</div>
+                    <br>
+                    <div class="date-range">
+                      <el-date-picker
+                        v-model="endDate"
+                        type="date"
+                        placeholder="请选择结束时间"
+                        :disabled-date="disabledDate"
+                        :shortcuts="shortcuts"
+                        :size="size" />
+                    </div>
+                  </div>
+
+                  <button class="clear-filter-btn" @click="clearHistoryFilters">
+                    清除筛选条件
+                  </button>
+                </div>
+              </el-col>
+
+            </el-row>
+
+          </el-main>
+        </el-container>
+      </div>
+
+    </div>
+
+  </body>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="https://unpkg.com/element-plus"></script>
+  <script src="global.js"></script>
+  <script src="consult.js"></script>
+</html>

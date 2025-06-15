@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8">
+    <title>Vue 3 + Element Plus 示例</title>
+    <link rel="stylesheet"
+      href="https://unpkg.com/element-plus/dist/index.css" />
+      <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="global.css">
+    <link rel="stylesheet" href="index.css">
+  </head>
+  <body>
+    <!-- Vue + Element Plus 控制的 Navbar -->
+    <div id="app">
+      <div class="common-layout">
+        <el-container>
+          <el-header>
+            <el-menu
+              :default-active="activeIndex"
+              class="el-menu-demo"
+              mode="horizontal"
+              text-color="#faebd7"
+              :ellipsis="false"
+              @select="handleSelect">
+              <el-menu-item index="0">
+                <h1>PetSync</h1>
+              </el-menu-item>
+              <el-menu-item v-for="(website, index) in websites.slice(1, 5)" :key="website.index" :index="(index + 1).toString()"><h3 class="menu-title">{{ website
+                }}</h3></el-menu-item>
+            </el-menu>
+          </el-header>
+          <el-main>
+            <div class="social-app">
+              <!-- 左侧边栏（个人信息） -->
+              <div class="left-sidebar">
+                <div class="profile-card">
+                  <img :src="defaultAvatar" alt="头像"
+                    class="profile-avatar">
+                  <h3 class="username">IvanPun</h3>
+                  <div class="profile-stats">
+                    <div class="stat-item"
+                      @click="goToUserConnections(id, 'following')">
+                      <span class="stat-number">{{ followingCount
+                        }}</span>
+                      <span class="stat-label">关注</span>
+                    </div>
+                    <div class="stat-item"
+                      @click="goToUserConnections(id, 'followers')">
+                      <span class="stat-number">{{ followedCount
+                        }}</span>
+                      <span class="stat-label">粉丝</span>
+                    </div>
+                    <div class="stat-item"
+                      @click="goToUserPosts(id)">
+                      <span class="stat-number">{{ postCount
+                        }}</span>
+                      <span class="stat-label">动态</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 主内容区 -->
+              <div class="main-content">
+                <!-- 发布动态区域 -->
+                <div class="post-editor">
+                  <textarea v-model="postContent"
+                    placeholder="分享你的想法..."></textarea>
+
+                  <!-- 图片预览区域 -->
+                  <div class="image-preview" v-if="previewImage">
+                    <img :src="previewImage" alt="预览图片">
+                    <button class="remove-image" @click="removeImage">×</button>
+                  </div>
+
+                  <div class="selected-tags" v-if="selectedTags.length > 0">
+                    <span class="tag selected"
+                      v-for="(tag, index) in selectedTags" :key="tag">
+                      #{{ tag }}
+                      <span class="remove-tag"
+                        @click="removeTag(index)">×</span>
+                    </span>
+                  </div>
+                  <div class="post-toolbar">
+                    <div class="toolbar-left">
+                      <!-- 图片上传按钮 -->
+                      <label for="image-upload" class="tag upload-btn">
+                        <i class="icon-image">📷</i> 图片
+                      </label>
+                      <input id="image-upload" type="file" accept="image/*"
+                        @change="handleImageUpload" style="display: none">
+
+                      <div class="tag-section">
+                        <div class="tag-options">
+                          <span class="tag" v-for="tag in visibleTags"
+                            @click="addTag(tag)" :key="tag">#{{ tag }}</span>
+                          <span class="tag more-tags-btn"
+                            @click.stop="toggleTagDropdown">
+                            {{ showTagDropdown ? '收起' : '更多标签' }}
+                          </span>
+                        </div>
+                        <div class="tag-dropdown" v-if="showTagDropdown"
+                          ref="tagDropdown">
+                          <span class="tag" v-for="tag in moreTags"
+                            @click="selectTag(tag)" :key="tag">#{{ tag }}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <button class="post-btn" @click="submitPost"
+                      :disabled="!postContent.trim() && selectedTags.length === 0 && !previewImage">发布</button>
+                  </div>
+                </div>
+
+                <!-- 用户筛选栏 -->
+                <div class="user-filter">
+                  <div class="filter-header">
+                    <h3>动态筛选</h3>
+                    <div class="filter-controls">
+                      <button class="nav-button" @click="scrollUsers(-1)"
+                        :disabled="isScrollLeft">
+                        <i class="icon-arrow">←</i>
+                      </button>
+                      <button class="nav-button" @click="scrollUsers(1)"
+                        :disabled="isScrollRight">
+                        <i class="icon-arrow">→</i>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="user-list" ref="userList">
+                    <div class="user-item all"
+                      :class="{ active: selectedUser === null }"
+                      @click="selectUser(null)">
+                      <span>全部</span>
+                    </div>
+                    <div class="user-item" v-for="user in filterUsers"
+                      :key="user.id"
+                      :class="{ active: selectedUser === id }"
+                      @click="selectUser(user.id)">
+                      <img :src="defaultAvatar" :alt="name">
+                      <span class="user-name">Ivan</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 动态列表 -->
+                <div class="feed-list">
+                  <div v-if="loading" class="loading">加载中...</div>
+                  <div v-else-if="error" class="error">{{ error }}</div>
+                  <div class="post-card" v-for="post in filteredPosts"
+                    :key="post.id">
+                    <div class="post-header">
+                      <img :src="post.author.avatar || defaultAvatar"
+                        class="post-avatar"
+                        @click="goToUserPosts(post.author.id)">
+                      <div class="post-user">
+                        <span class="username">{{ post.author.name }}</span>
+                        <span class="post-time">{{ formatTime(post.time)
+                          }}</span>
+                      </div>
+                      <button class="follow-btn"
+                        :class="{ following: post.author.isFollowing }"
+                        @click="toggleFollow(post.author)"
+                        v-if="post.author.id !== currentUser.id">
+                        {{ post.author.isFollowing ? '已关注' : '关注' }}
+                      </button>
+                    </div>
+                    <div class="post-tags"
+                      v-if="post.tags && post.tags.length > 0">
+                      <span class="post-tag" v-for="tag in post.tags"
+                        @click="viewTag(tag)">#{{ tag }}</span>
+                    </div>
+                    <div class="post-content">
+                      <p>{{ post.textContent }}</p>
+                      <img v-if="post.image"
+                        :src="'http://xxx.xxx.xxx.xx'+ post.image"
+                        class="post-image">
+                    </div>
+                    <div class="post-actions">
+                      <button @click="toggleLike(post)">
+                        <i :class="['icon-like', { liked: post.isLiked }]">♥</i>
+                        {{ post.likes }}
+                      </button>
+                      <button @click="handleCommentClick(post)">
+                        <i class="icon-comment">💬</i>
+                        {{ post.commentCount }}
+                      </button>
+                      <button @click="toggleCoin(post)">
+                        <i
+                          :class="['icon-coin', { coined: post.isCoined }]">🪙</i>
+                        {{ post.coins }}
+                      </button>
+                    </div>
+
+                    <!-- 评论区域 -->
+                    <div class="comment-section" v-if="post.showComments">
+                      <div class="comment-input">
+                        <img :src="currentUser.avatar || defaultAvatar"
+                          class="comment-avatar">
+                        <input v-model="post.newComment"
+                          @keyup.enter="addComment(post)" placeholder="写评论...">
+                      </div>
+                      <div class="comment-list">
+                        <div class="comment-item"
+                          v-for="(comment) in post.comments.slice(0, 10)"
+                          :key="comment.id">
+                          <img :src="comment.user.avatar || defaultAvatar"
+                            class="comment-avatar">
+                          <div class="comment-content">
+                            <span class="comment-user">{{ comment.user.name
+                              }}</span>
+                            <p>{{ comment.text }}</p>
+                            <span class="comment-time">{{
+                              formatTime(comment.time) }}</span>
+                          </div>
+                        </div>
+                        <p v-if="post.comments.length > 1" class="more-comments"
+                          @click="viewAllComments(post.id)">
+                          查看更多评论（共{{ post.comments.length }}条）
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div v-if="filteredPosts.length === 0 && !loading"
+                    class="empty-feed">
+                    <p>暂无动态，快去发布第一条吧~</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 右侧边栏（推荐话题） -->
+              <div class="right-sidebar">
+                <div class="recommend-title">推荐话题</div>
+                <div class="search-box">
+                  <input v-model="enterTag" @keyup.enter="searchTag()"
+                    type="text" placeholder="搜索话题..." class="search-input">
+                  <button class="search-button" @click="searchTag()">搜索</button>
+                </div>
+                <div class="recommend-list">
+                  <div class="recommend-tag" v-for="tag in recommendedTags"
+                    :key="tag" @click="viewTag(tag)">
+                    #{{ tag }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </el-main>
+        </el-container>
+      </div>
+
+    </div>
+
+  </body>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="https://unpkg.com/element-plus"></script>
+  <script src="global.js"></script>
+  <script src="index.js"></script>
+</html>

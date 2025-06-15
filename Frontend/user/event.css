@@ -1,0 +1,135 @@
+.el-row {
+    margin-bottom: 20px;
+}
+
+.el-row:last-child {
+    margin-bottom: 0;
+}
+
+.el-col {
+    border-radius: 4px;
+}
+
+.grid-content {
+    border-radius: 4px;
+    min-height: 36px;
+}
+
+.add-button {
+    background: #5D4037;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10%;
+    white-space: nowrap;
+}
+
+.add-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px #4E342E;
+}
+
+.addEventButton {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.dialog-right{
+    padding-top: 8px;
+}
+
+.event-block{
+    margin-bottom: 2.5%;
+}
+
+.card-theme--soft-orange {
+  background-color: #FFE0B2;
+  border: 1px solid #FFB74D;
+  color: #6D4C41;
+}
+
+.card-theme--sky-blue {
+  background-color: #BBDEFB;
+  border: 1px solid #64B5F6;
+  color: #0D47A1;
+}
+
+.card-theme--green-nature {
+  background-color: #C8E6C9;
+  border: 1px solid #81C784;
+  color: #1B5E20;
+}
+
+.card-theme--healing-purple {
+  background-color: #E1BEE7;
+  border: 1px solid #BA68C8;
+  color: #4A148C;
+}
+
+.card-theme--default {
+  background-color: #FFFFFF;
+  border: 1px solid #BDBDBD;
+  color: #212121;
+}
+
+.detail-button {
+  color: white;
+  border: none;
+}
+
+.card-theme--soft-orange .detail-button {
+  background-color: #FFB74D;
+}
+.card-theme--soft-orange .detail-button:hover {
+  background-color: #FFA726;
+  color: white;
+}
+
+.card-theme--sky-blue .detail-button {
+  background-color: #64B5F6;
+}
+.card-theme--sky-blue .detail-button:hover {
+  background-color: #42A5F5;
+  color: white;
+}
+
+.card-theme--green-nature .detail-button {
+  background-color: #81C784;
+}
+.card-theme--green-nature .detail-button:hover {
+  background-color: #66BB6A;
+  color: white;
+}
+
+.card-theme--healing-purple .detail-button {
+  background-color: #BA68C8;
+}
+.card-theme--healing-purple .detail-button:hover {
+  background-color: #AB47BC;
+  color: white;
+}
+
+.card-theme--default .detail-button {
+  background-color: #757575;
+}
+.card-theme--default .detail-button:hover {
+  background-color: #616161;
+  color: white;
+}
+
+.card-header{
+  margin-bottom: 2.5%;
+  display: flex;
+  justify-content: space-between;
+}
+
+
+

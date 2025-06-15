@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8">
+    <title>Vue 3 + Element Plus 示例</title>
+    <link rel="stylesheet"
+      href="https://unpkg.com/element-plus/dist/index.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap"
+      rel="stylesheet">
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+    <link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="global.css">
+    <link rel="stylesheet" href="selfcenter.css">
+  </head>
+  <body>
+    <!-- Vue + Element Plus 控制的 Navbar -->
+    <div id="app">
+      <div class="common-layout">
+        <el-container>
+
+          <!-- NavBar -->
+          <el-header>
+            <el-menu
+              :default-active="activeIndex"
+              class="el-menu-demo"
+              mode="horizontal"
+              text-color="#faebd7"
+              :ellipsis="false"
+              @select="handleSelect">
+              <el-menu-item index="0">
+                <h1>PetSync</h1>
+              </el-menu-item>
+              <el-menu-item v-for="(website, index) in websites.slice(1, 5)"
+                :key="website.index" :index="(index + 1).toString()"><h3 class="menu-title">{{ website
+                }}</h3></el-menu-item>
+            </el-menu>
+          </el-header>
+
+          <el-main>
+            <div class="user-center">
+              <!-- 基本信息 -->
+              <div class="card">
+                <div class="cus-card-header">
+                  <h2>我的信息</h2>
+                </div>
+
+                <div class="info">
+                  <!-- 头像上传区域 -->
+                  <div class="avatar-section">
+                    <div class="avatar-container"
+                      @click="triggerFileInput('user')">
+                      <img
+                        :src="userInfo.avatar? userInfo.avatar : defaultAvatar"
+                        alt="用户头像"
+                        class="avatar" />
+                      <div class="avatar-overlay">
+                        <i class="upload-icon"></i>
+                      </div>
+                      <input
+                        type="file"
+                        ref="userFileInput"
+                        @change="(e) => handleFileUpload(e, 'user')"
+                        accept="image/*"
+                        style="display: none" />
+                    </div>
+                    <p class="avatar-hint">点击更换头像</p>
+                  </div>
+
+                  <div class="details">
+                    <div class="info-item">
+                      <p class="label">昵称：</p>
+                      <div class="input-wrapper">
+                        <el-input v-model="userInfo.username" class="input-box"
+                          placeholder="Please input" maxlength="30" />
+                      </div>
+                    </div>
+
+                    <div class="info-item">
+                      <p class="label">性别：</p>
+                      <el-radio-group v-model="userInfo.gender">
+                        <el-radio value="男" size="large">男</el-radio>
+                        <el-radio value="女" size="large">女</el-radio>
+                      </el-radio-group>
+                    </div>
+
+                    <div class="info-item">
+                      <p class="label">地点：</p>
+                      <el-select v-model="userInfo.location"
+                        placeholder="Select"
+                        style="width: 240px; padding-top: 1.5%;">
+                        <el-option
+                          v-for="item in cities"
+                          :key="item.value"
+                          :label="item.label"
+                          :value="item.value" />
+                      </el-select>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="action-buttons">
+                  <button class="save-button" @click="saveChanges"
+                    :disabled="isLoading">
+                    <span v-if="!isLoading">保存更改</span>
+                    <span v-else class="loading-spinner"></span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- 宠物信息 -->
+              <div class="card">
+                <div class="cus-card-header pet-info-header">
+                  <h2>宠物信息</h2>
+                  <button class="add-button"
+                    @click="dialogVisible = true">
+                    <i class="bi bi-plus-circle"
+                      style="padding-top: 5%;"></i><span>新增宠物</span>
+                  </button>
+                </div>
+
+                <!-- n张卡片n只宠物 -->
+                <el-card class="pet-card" v-for="(pet, index) in petProfiles"
+                  :key="index">
+                  <div class="card-header pet-card-header">
+                    <i class="bi bi-trash-fill"></i>
+                  </div>
+                  <el-row :gutter="20">
+                    <el-col :span="6">
+                      <div class="avatar-section">
+                        <div class="avatar-container"
+                          @click="triggerFileInput(index)">
+                          <img :src="pet.avatar? pet.avatar : defaultAvatar"
+                            alt="宠物头像"
+                            class="avatar" />
+                          <div class="avatar-overlay">
+                            <i class="upload-icon"></i>
+                          </div>
+                          <input
+                            type="file"
+                            :ref="el => petFileInputs[index] = el"
+                            @change="e => handleFileUpload(e, index)"
+                            accept="image/*"
+                            style="display: none" />
+                        </div>
+                        <p class="avatar-hint">点击更换头像</p>
+                      </div>
+                    </el-col>
+                    <el-col :span="18">
+                      <div class="details">
+                        <div class="info-item">
+                          <p class="label">毛孩子昵称：</p>
+                          <div class="input-wrapper">
+                            <el-input v-model="pet.name"
+                              class="input-box"
+                              placeholder="Please input" maxlength="30" />
+                          </div>
+                        </div>
+                        <div class="info-item">
+                          <p class="label">宠物类型：</p>
+                          <div class="input-wrapper">
+                            <el-select v-model="pet.type"
+                              placeholder="Select"
+                              style="max-width: 300px; padding-top: 2.5%;">
+                              <el-option
+                                v-for="item in petOptions"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value" />
+                            </el-select>
+                          </div>
+                        </div>
+                        <div class="info-item">
+                          <p class="label">性别：</p>
+                          <el-radio-group v-model="pet.gender">
+                            <el-radio value="男" size="large">男</el-radio>
+                            <el-radio value="女" size="large">女</el-radio>
+                          </el-radio-group>
+                        </div>
+                        <div class="info-item">
+                          <p class="label">出生日期：</p>
+                          <el-date-picker
+                            v-model="pet.birthDay"
+                            type="date"
+                            placeholder="Pick a day"
+                            :disabled-date="disabledDate"
+                            :shortcuts="shortcuts"
+                            :size="size"
+                            style="margin-top: 2.5%;" />
+                        </div>
+                      </div>
+                    </el-col>
+                  </el-row>
+
+                </el-card>
+
+              </div>
+
+              <el-dialog
+                v-model="dialogVisible"
+                title="新增宠物"
+                width="60%">
+
+                <el-row :gutter="20">
+                  <el-col :span="6">
+                    <div class="avatar-section">
+                      <div class="avatar-container"
+                        @click="triggerFileInput('new')">
+                        <img :src="newPet.avatar" alt="新宠物头像"
+                          class="avatar" />
+                        <div class="avatar-overlay">
+                          <i class="upload-icon"></i>
+                        </div>
+                        <input
+                          type="file"
+                          ref="newPetFileInput"
+                          @change="e => handleFileUpload(e, 'new')"
+                          accept="image/*"
+                          style="display: none" />
+                      </div>
+                      <p class="avatar-hint">点击更换头像</p>
+                    </div>
+                  </el-col>
+                  <el-col :span="18">
+                    <div class="details">
+                      <div class="info-item">
+                        <p class="label">毛孩子昵称：</p>
+                        <div class="input-wrapper">
+                          <el-input v-model="newPet.name"
+                            class="input-box"
+                            placeholder="Please input" maxlength="30" />
+                        </div>
+                      </div>
+                      <div class="info-item">
+                        <p class="label">宠物类型：</p>
+                        <div class="input-wrapper">
+                          <el-select v-model="newPet.type"
+                            placeholder="Select"
+                            style="max-width: 300px; padding-top: 2.5%;">
+                            <el-option
+                              v-for="item in petOptions"
+                              :key="item.value"
+                              :label="item.label"
+                              :value="item.value" />
+                          </el-select>
+                        </div>
+                      </div>
+                      <div class="info-item">
+                        <p class="label">性别：</p>
+                        <el-radio-group v-model="newPet.gender">
+                          <el-radio value="男" size="large">男</el-radio>
+                          <el-radio value="女" size="large">女</el-radio>
+                        </el-radio-group>
+                      </div>
+                      <div class="info-item">
+                        <p class="label">出生日期：</p>
+                        <el-date-picker
+                          v-model="newPet.birthDay"
+                          type="date"
+                          placeholder="Pick a day"
+                          :disabled-date="disabledDate"
+                          :shortcuts="shortcuts"
+                          :size="size"
+                          style="margin-top: 2.5%;" />
+                      </div>
+                    </div>
+                  </el-col>
+                </el-row>
+
+                <template #footer>
+                  <div class="dialog-footer">
+                    <el-button
+                      @click="dialogVisible = false">Cancel</el-button>
+                    <el-button type="primary"
+                      @click="confirmAddPet">
+                      Confirm
+                    </el-button>
+                  </div>
+                </template>
+              </el-dialog>
+
+              <!-- 安全中心 -->
+              <div class="card">
+                <h2>安全中心</h2>
+                <div class="security-item">
+                  <div class="security-info">
+                    <i class="security-icon">🔒</i>
+                    <div>
+                      <p class="security-title">登录密码</p>
+                      <p class="security-desc">定期更改密码以确保账户安全</p>
+                    </div>
+                  </div>
+                  <button class="security-action"
+                    @click="changePassword">更改</button>
+                </div>
+                <div class="security-item">
+                  <div class="security-info">
+                    <i class="security-icon">❓</i>
+                    <div>
+                      <p class="security-title">忘记密码</p>
+                      <p class="security-desc">通过邮箱验证重置密码</p>
+                    </div>
+                  </div>
+                  <button class="security-action"
+                    @click="forgotPassword">重置</button>
+                </div>
+                <div class="security-item logout-item">
+                  <div class="security-info">
+                    <i class="security-icon">🚪</i>
+                    <div>
+                      <p class="security-title">退出登录</p>
+                      <p class="security-desc">安全退出当前账号</p>
+                    </div>
+                  </div>
+                  <button class="security-action"
+                    @click="handleLogout">退出</button>
+                </div>
+              </div>
+            </div>
+          </el-main>
+
+          <footer class="contact-footer">
+            <div class="contact-container">
+              <h4>联系我们</h4>
+              <p>如有任何问题、建议或需要帮助，请随时与我们联系。</p>
+              <div class="contact-methods">
+                <div class="contact-item">
+                  <i class="fas fa-envelope"></i>
+                  <span>support@petcare.com</span>
+                </div>
+                <div class="contact-item">
+                  <i class="fas fa-phone-alt"></i>
+                  <span>+86 123 4567 890</span>
+                </div>
+                <div class="contact-item">
+                  <i class="fas fa-weixin"></i>
+                  <span>官方微信号：PetSync</span>
+                </div>
+              </div>
+            </div>
+          </footer>
+
+        </el-container>
+      </div>
+
+    </div>
+
+  </body>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="https://unpkg.com/element-plus"></script>
+  <script src="global.js"></script>
+  <script src="selfcenter.js"></script>
+</html>

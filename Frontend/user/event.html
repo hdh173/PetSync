@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+    <head>
+        <meta charset="UTF-8">
+        <title>Vue 3 + Element Plus 示例</title>
+        <link rel="stylesheet"
+            href="https://unpkg.com/element-plus/dist/index.css" />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap"
+            rel="stylesheet">
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+
+        <link rel="stylesheet" href="global.css">
+        <link rel="stylesheet" href="event.css">
+    </head>
+    <body>
+        <!-- Vue + Element Plus 控制的 Navbar -->
+        <div id="app">
+            <div class="common-layout">
+                <el-container>
+                    <el-header>
+                        <el-menu
+                            :default-active="activeIndex"
+                            class="el-menu-demo"
+                            mode="horizontal"
+                            text-color="#faebd7"
+                            :ellipsis="false"
+                            @select="handleSelect">
+                            <el-menu-item index="0">
+                                <h1>PetSync</h1>
+                            </el-menu-item>
+                            <el-menu-item
+                                v-for="(website, index) in websites.slice(1, 5)"
+                                :key="website.index"
+                                :index="(index + 1).toString()"><h3 class="menu-title">{{ website
+                }}</h3></el-menu-item>
+                        </el-menu>
+                    </el-header>
+                    <el-main>
+
+                        <el-row :gutter="20">
+                            <el-col :span="6"
+                                style="display: flex; align-items: center; gap: 10px;">
+                                <div>选择宠物</div>
+                                <el-select v-model="petFilter"
+                                    placeholder="Select"
+                                    style="width: 240px">
+                                    <el-option
+                                        v-for="item in petOptions"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value" />
+                                </el-select>
+                            </el-col>
+                            <el-col :span="6"
+                                style="display: flex; align-items: center; gap: 10px;">
+                                <div>时间顺序</div>
+                                <el-select v-model="sortOrder"
+                                    placeholder="Select"
+                                    style="width: 240px">
+                                    <el-option
+                                        v-for="item in sortOptions"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value" />
+                                </el-select>
+                            </el-col>
+                            <el-col :span="6" :offset="6">
+                                <div class="addEventButton">
+                                    <button class="add-button"
+                                        @click="newDialogVisible = true">
+                                        <i class="bi bi-plus-circle"
+                                            style="padding-top: 5%;"></i><span>新增事件</span>
+                                    </button>
+                                </div>
+                            </el-col>
+                        </el-row>
+
+                        <el-dialog
+                            v-model="newDialogVisible"
+                            title="新增事件"
+                            width="500">
+
+                            <el-row :gutter="20">
+                                <el-col :span="6">
+                                    <p>事件名称</p>
+                                </el-col>
+                                <el-col :span="12">
+                                    <el-input v-model="newEvent.name"
+                                        style="width: 240px"
+                                        placeholder="请输入事件名称"
+                                        class="dialog-right" />
+                                </el-col>
+                                <el-col :span="6"
+                                    style="display: flex; align-items: center; gap: 10px; color: red;"
+                                    v-if="inputWarning && newEvent.eventName.trim() === ''">
+                                    <i
+                                        class="bi bi-exclamation-circle-fill"></i><p>不能为空</p>
+                                </el-col>
+                            </el-row>
+
+                            <el-row :gutter="20">
+                                <el-col :span="6">
+                                    <p>毛孩子</p>
+                                </el-col>
+                                <el-col :span="18">
+                                    <el-select v-model="newEvent.pet"
+                                        placeholder="请选择"
+                                        style="width: 240px"
+                                        class="dialog-right">
+                                        <el-option
+                                            v-for="option in petOptions.slice(1)"
+                                            :key="option.value"
+                                            :label="option.label"
+                                            :value="option.value" />
+                                    </el-select>
+                                </el-col>
+                            </el-row>
+
+                            <el-row :gutter="20">
+                                <el-col :span="6">
+                                    <p>提醒方式</p>
+                                </el-col>
+                                <el-col :span="18">
+                                    <el-radio-group
+                                        v-model="newEvent.reminderMethod"
+                                        class="dialog-right">
+                                        <el-radio
+                                            value="弹窗通知">弹窗通知</el-radio>
+                                        <el-radio value="邮件">邮件</el-radio>
+                                    </el-radio-group>
+                                </el-col>
+                            </el-row>
+
+                            <el-row :gutter="20">
+                                <el-col :span="6">
+                                    <p>是否重复</p>
+                                </el-col>
+                                <el-col :span="18">
+                                    <el-select v-model="newEvent.repeat"
+                                        placeholder="请选择"
+                                        style="width: 240px"
+                                        class="dialog-right">
+                                        <el-option
+                                            v-for="option in repeatOptions"
+                                            :key="option.value"
+                                            :label="option.label"
+                                            :value="option.value" />
+                                    </el-select>
+                                </el-col>
+                            </el-row>
+
+                            <el-row :gutter="20">
+                                <el-col :span="6">
+                                    <p>提醒时间</p>
+                                </el-col>
+                                <el-col :span="18">
+                                    <el-date-picker
+                                        v-model="newEvent.remindTime"
+                                        type="datetime"
+                                        placeholder="选择一个日期时间"
+                                        :shortcuts="shortcuts"
+                                        style="margin-top: 2.5%;" />
+                                </el-col>
+                            </el-row>
+
+                            <el-row :gutter="20">
+                                <el-col :span="6">
+                                    <p>卡片颜色</p>
+                                </el-col>
+                                <el-col :span="18">
+                                    <el-select v-model="newEvent.theme"
+                                        placeholder="请选择"
+                                        style="width: 240px"
+                                        class="dialog-right">
+                                        <el-option
+                                            v-for="option in colorOptions"
+                                            :key="option.value"
+                                            :label="option.label"
+                                            :value="option.value" />
+                                    </el-select>
+                                </el-col>
+                            </el-row>
+
+                            <template #footer>
+                                <div class="dialog-footer">
+                                    <el-button
+                                        @click="newDialogVisible = false">取消</el-button>
+                                    <el-button type="primary"
+                                        @click="addEvent">
+                                        确定
+                                    </el-button>
+                                </div>
+                            </template>
+                        </el-dialog>
+
+                        <el-dialog
+                            v-model="detailDialogVisible"
+                            :title="detailEvent.name"
+                            width="500">
+
+                            <el-row :gutter="20">
+                                <el-col :span="8">
+                                    <div>毛孩子</div>
+                                </el-col>
+                                <el-col :span="16">
+                                    <div>{{detailEvent.pet}}</div>
+                                </el-col>
+                            </el-row>
+                            <el-row :gutter="20">
+                                <el-col :span="8">
+                                    <div>提醒方式</div>
+                                </el-col>
+                                <el-col :span="16">
+                                    <div>{{detailEvent.reminderMethod}}</div>
+                                </el-col>
+                            </el-row>
+                            <el-row :gutter="20">
+                                <el-col :span="8">
+                                    <div>重复</div>
+                                </el-col>
+                                <el-col :span="16">
+                                    <div>{{detailEvent.repeat}}</div>
+                                </el-col>
+                            </el-row>
+                            <el-row :gutter="20">
+                                <el-col :span="8">
+                                    <div>提醒时间</div>
+                                </el-col>
+                                <el-col :span="16">
+                                    <div>{{detailEvent.remindTime}}</div>
+                                </el-col>
+                            </el-row>
+                            <template #footer>
+                                <div class="dialog-footer">
+                                    <el-button type="primary"
+                                        @click="detailDialogVisible = false">
+                                        确定
+                                    </el-button>
+                                </div>
+                            </template>
+                        </el-dialog>
+
+                        <el-row :gutter="20">
+                            <el-col :span="6" class="event-block"
+                                v-for="(event, index) in filteredEventList"
+                                :key="index">
+                                <el-card :class="'card-theme--' + event.theme"
+                                    style="max-width: 480px">
+                                    <div class="card-header">
+                                        <div>{{event.name}}({{event.pet}})</div>
+                                        <i class="bi bi-trash-fill"  @click="removeEvent(event)" style="cursor: pointer;"></i></i>
+                                    </div>
+                                    <div>提醒时间：{{event.remindTime}}</div>
+                                    <div
+                                        style="display: flex; justify-content: flex-end">
+                                        <el-button class="detail-button"
+                                            @click.stop="showEventDetail(event)">
+                                            詳細
+                                        </el-button>
+                                    </div>
+                                </el-card>
+                            </el-col>
+                        </el-row>
+                        
+                        <el-dialog
+                            v-model="removeAlertVisible"
+                            title="警告">
+                            <h2>是否确认删除 {{detailEvent.name}}({{detailEvent.pet}})</h2>
+                            <template #footer>
+                                <div class="dialog-footer">
+                                    <el-button
+                                        @click="removeAlertVisible = false">取消</el-button>
+                                    <el-button type="primary"
+                                        @click="confirmRemoveEvent">
+                                        确定
+                                    </el-button>
+                                </div>
+                            </template>
+                        </el-dialog>
+
+                    </el-main>
+                </el-container>
+            </div>
+
+        </div>
+
+    </body>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/element-plus"></script>
+    <script src="global.js"></script>
+    <script src="event.js"></script>
+</html>

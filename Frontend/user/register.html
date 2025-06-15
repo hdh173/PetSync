@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8">
+    <title>Vue 3 + Element Plus 示例</title>
+    <link rel="stylesheet"
+      href="https://unpkg.com/element-plus/dist/index.css" />
+      <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="global.css">
+    <link rel="stylesheet" href="register.css">
+  </head>
+  <body>
+    <!-- Vue + Element Plus 控制的 Navbar -->
+    <div id="app">
+      <div class="common-layout">
+        <el-container>
+          <el-header>
+            <el-menu
+              class="el-menu-demo"
+              mode="horizontal"
+              text-color="#faebd7"
+              :ellipsis="false">
+              <el-menu-item index="0">
+                <h1>PetSync</h1>
+              </el-menu-item>
+              <el-menu-item v-for="(website, index) in websites.slice(1, 5)"
+                :key="website.index" :index="(index + 1).toString()"><h3 class="menu-title">{{ website
+                }}</h3></el-menu-item>
+            </el-menu>
+          </el-header>
+
+          <el-main>
+            <div class="auth-container">
+              <!-- 登录表单 -->
+              <div class="login-container" v-if="showLogin">
+                <h2>用户登录</h2>
+                <form @submit.prevent="handleLogin">
+                  <div class="form-group">
+                    <label for="usernameOrEmail">用户名/邮箱：</label>
+                    <input
+                      type="text"
+                      id="usernameOrEmail"
+                      v-model="loginForm.usernameOrEmail"
+                      required />
+                  </div>
+
+                  <div class="form-group">
+                    <label for="loginPassword">密码：</label>
+                    <input
+                      type="password"
+                      id="loginPassword"
+                      v-model="loginForm.password"
+                      required />
+                  </div>
+
+                  <div class="login-warning" v-if="loginWarningVisible">帐户或密码错误</div>
+
+                  <button type="submit"
+                    :disabled="!loginForm.usernameOrEmail || !loginForm.password">
+                    登录
+                  </button>
+
+                  <p class="toggle-auth" @click="switchToRegister">没有账号？立即注册</p>
+                </form>
+              </div>
+
+              <!-- 注册表单 -->
+              <div class="register-container" v-else>
+                <h2>用户注册</h2>
+                <form @submit.prevent="handleRegister">
+                  <div class="form-group">
+                    <label for="username">用户名：</label>
+                    <input
+                      type="text"
+                      id="username"
+                      v-model="registerForm.username"
+                      required />
+                  </div>
+
+                  <div class="form-group">
+                    <label for="email">邮箱：</label>
+                    <div class="email-verify">
+                      <input
+                        type="email"
+                        id="email"
+                        v-model="registerForm.email"
+                        required
+                        @blur="validateEmail" />
+                      <button
+                        type="button"
+                        class="verify-btn"
+                        @click="sendVerificationCodeHandler"
+                        :disabled="!isEmailValid || isCountingDown">
+                        {{ countdown > 0 ? `${countdown}s后重新获取` : '获取验证码' }}
+                      </button>
+                    </div>
+                    <span class="error-msg" v-if="emailError">{{ emailError
+                      }}</span>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="verificationCode">验证码：</label>
+                    <input
+                      type="text"
+                      id="verificationCode"
+                      v-model="registerForm.verificationCode"
+                      required />
+                  </div>
+
+                  <div class="form-group">
+                    <label for="password">密码：</label>
+                    <input
+                      type="password"
+                      id="password"
+                      v-model="registerForm.password"
+                      required
+                      @input="validatePassword" />
+                    <div class="password-strength" :class="passwordStrength">
+                      包含、大小写字母及数字；长度不小于8
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="confirmPassword">确认密码：</label>
+                    <input
+                      type="password"
+                      id="confirmPassword"
+                      v-model="registerForm.confirmPassword"
+                      required
+                      @blur="validateConfirmPassword" />
+                    <span class="error-msg" v-if="confirmPasswordError">{{
+                      confirmPasswordError }}</span>
+                  </div>
+
+                  <button type="submit"
+                    :disabled="isRegisterDisabled">注册</button>
+
+                  <p class="toggle-auth" @click="switchToLogin">已有账号？立即登录</p>
+                </form>
+              </div>
+            </div>
+          </el-main>
+        </el-container>
+      </div>
+
+    </div>
+
+  </body>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="https://unpkg.com/element-plus"></script>
+  <script src="global.js"></script>
+  <script src="register.js"></script>
+</html>
