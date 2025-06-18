@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>在线咨询</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css" />
+  <link rel="stylesheet" href="doctor-consult.css">
+</head>
+<body>
+  <div id="app">
+    <el-container>
+      <el-header style="padding:0;">
+        <el-menu 
+          :default-active="activeIndex"
+          mode="horizontal" 
+          background-color="#1890ff" 
+          text-color="#fff" 
+          active-text-color="#ffd04b" 
+          style="border-bottom:none;"
+          @select="handleSelect"
+        >
+          <el-menu-item index="0" style="font-size: 20px; font-weight: bold;cursor:default;background:transparent!important;">PetSync</el-menu-item>
+          <div style="flex-grow: 1;"></div>
+          <el-menu-item index="1">咨询服务</el-menu-item>
+          <el-menu-item index="2">个人中心</el-menu-item>
+          <el-menu-item index="3" style="cursor: default; background: transparent !important;">欢迎您，{{ userInfo.username }}</el-menu-item>
+          <el-menu-item index="4">退出</el-menu-item>
+        </el-menu>
+      </el-header>
+      <el-main style="background:#e6f7fa; padding: 20px;">
+        <el-row style="margin:0;" :gutter="16" class="doctor-main-row">
+          <!-- 左侧会话列表 -->
+          <el-col :xs="24" :sm="6" :md="5" :lg="5" :xl="5">
+            <el-card style="height:100%;">
+              <h3>当前会话</h3>
+              <el-input placeholder="搜索会话..." v-model="search"></el-input>
+              <el-menu :default-active="currentSessionId" @select="switchSession" style="margin-top:10px;">
+                <el-menu-item v-for="session in filteredSessions" :key="session.id" :index="session.id">
+                  <el-avatar :src="session.avatar" size="small" style="margin-right:8px"></el-avatar>
+                  {{ session.userName }}
+                </el-menu-item>
+              </el-menu>
+            </el-card>
+          </el-col>
+          <!-- 中间聊天区 -->
+          <el-col :xs="24" :sm="12" :md="14" :lg="14" :xl="14" style="display:flex;justify-content:center;">
+            <el-card class="chat-card" style="width:100%;max-width:800px;height:800px;max-height:calc(100vh - 120px);margin:0 auto;">
+              <div class="chat-header" v-if="currentSession">
+                <el-avatar :src="currentSession.avatar" size="large" style="margin-right:12px"></el-avatar>
+                <span style="font-size:18px;font-weight:bold;">{{ currentSession.userName }}</span>
+                <el-tag :type="currentSession.status==='ONGOING'?'success':'info'" style="margin-left:12px;">{{ currentSession.status }}</el-tag>
+              </div>
+              <el-scrollbar class="chat-messages" ref="scrollbarRef">
+                <div v-for="(msg, idx) in currentMessages" :key="idx" :class="['message-row', msg.type]">
+                  <el-avatar v-if="msg.type==='received'" :src="currentSession.avatar" size="small" class="message-avatar"></el-avatar>
+                  <div class="message-bubble">{{ msg.text }}</div>
+                  <el-avatar v-if="msg.type==='sent'" icon="UserFilled" size="small" class="message-avatar"></el-avatar>
+                  <div class="message-time">{{ msg.time }}</div>
+                </div>
+              </el-scrollbar>
+              <div class="chat-input-area">
+                <el-input type="textarea" v-model="newMessage" placeholder="输入回复消息..." rows="2" @keyup.enter="sendMessage"></el-input>
+                <el-button type="primary" @click="sendMessage" :disabled="!newMessage.trim()">发送</el-button>
+              </div>
+              <div class="session-ended-alert" v-if="['ENDS','ENDED','TIMEOUT'].includes(currentSession.status)">
+                <span>{{ getSessionEndText(currentSession) }}</span>
+              </div>
+            </el-card>
+          </el-col>
+          <!-- 右侧用户信息与反馈区 -->
+          <el-col :xs="24" :sm="6" :md="5" :lg="5" :xl="5">
+            <el-card>
+              <div v-if="currentSession" class="right-panel-content">
+                <div class="user-profile">
+                  <el-avatar :src="currentSession.avatar" size="large" class="profile-avatar"></el-avatar>
+                  <h4>{{ currentSession.userName }}</h4>
+                  <el-tag :type="currentSession.status==='ONGOING'?'success':'info'" style="margin-bottom:8px;">{{ currentSession.status }}</el-tag>
+                  <el-descriptions :column="1" border size="small">
+                    <el-descriptions-item label="性别">{{ currentSession.gender }}</el-descriptions-item>
+                    <el-descriptions-item label="职业">{{ currentSession.occupation }}</el-descriptions-item>
+                    <el-descriptions-item label="咨询次数">{{ currentSession.sessions }}</el-descriptions-item>
+                    <el-descriptions-item label="上次咨询">{{ currentSession.lastSession }}</el-descriptions-item>
+                  </el-descriptions>
+                </div>
+                <div class="user-feedback">
+                  <h4>咨询反馈</h4>
+                  <label>咨询结论：</label>
+                  <el-input type="textarea" v-model="summary" maxlength="30" rows="2" placeholder="请输入简要结论"></el-input>
+                  <label>详细建议：</label>
+                  <el-input type="textarea" v-model="suggestion" rows="4" placeholder="请输入详细建议" resize="vertical"></el-input>
+                  <div class="feedback-actions">
+                    <el-button type="success" @click="submitFeedback">提交反馈</el-button>
+                  </div>
+                </div>
+              </div>
+              <div v-else class="empty-state">
+                <p>请从左侧选择一个会话</p>
+              </div>
+
+              <el-button type="danger" plain @click="exitWorkStatus" style="width: 100%; margin-top: auto;">
+                退出工作状态
+              </el-button>
+            </el-card>
+          </el-col>
+        </el-row>
+      </el-main>
+    </el-container>
+  </div>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="https://unpkg.com/element-plus"></script>
+  <script src="doctor-consult.js"></script>
+</body>
+</html> 

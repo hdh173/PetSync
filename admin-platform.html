@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>管理员 - 审核中心</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css" />
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+  <link rel="stylesheet" href="admin-platform.css">
+</head>
+<body>
+  <div id="app">
+    <el-container>
+      <el-header style="padding:0;">
+        <el-menu 
+          :default-active="activeIndex"
+          mode="horizontal" 
+          background-color="#1890ff" 
+          text-color="#fff" 
+          active-text-color="#ffd04b" 
+          style="border-bottom:none;"
+          @select="handleSelect"
+        >
+          <el-menu-item index="0" style="font-size: 20px; font-weight: bold;cursor:default;background:transparent!important;">PetSync</el-menu-item>
+          <div style="flex-grow: 1;"></div>
+          <el-menu-item index="1">审核中心</el-menu-item>
+          <el-menu-item index="2">个人中心</el-menu-item>
+          <el-menu-item index="3" style="cursor: default; background: transparent !important;">欢迎您，{{ userInfo.username }}</el-menu-item>
+          <el-menu-item index="4">退出</el-menu-item>
+        </el-menu>
+      </el-header>
+      <el-main style="background:#f0f2f5; padding: 20px;">
+        <el-tabs v-model="activeTab" type="border-card" @tab-change="onTabChange">
+          <!-- 医生审核 -->
+          <el-tab-pane label="医生审核" name="doctor-audit">
+            <el-table :data="filteredDoctorAuditList" style="width: 100%">
+              <el-table-column prop="name" label="姓名"></el-table-column>
+              <el-table-column prop="hospital" label="所属医院"></el-table-column>
+              <el-table-column prop="qualification" label="资质证明">
+                <template #default="scope">
+                  <div>{{scope.row.qualificationId}}</div>
+                  <el-image style="width: 50px; height: 50px" :src="scope.row.qualification" :preview-src-list="[scope.row.qualification]"></el-image>
+                </template>
+              </el-table-column>
+              <el-table-column prop="status" label="状态">
+                <template #header>
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span>状态</span>
+                    <el-select v-model="doctorAuditStatusFilter" size="small" style="width: 100px;">
+                      <el-option v-for="item in doctorStatusOptions" :key="item" :label="item" :value="item" />
+                    </el-select>
+                  </div>
+                </template>
+                <template #default="scope">
+                    <el-tag :type="scope.row.status === '已通过' ? 'success' : (scope.row.status === '未通过' ? 'danger' : 'warning')">{{ scope.row.status }}</el-tag>
+                </template>
+              </el-table-column>
+              <el-table-column label="操作" width="180">
+                <template #default="scope">
+                  <div v-if="scope.row.status==='待审核'">
+                    <el-button size="small" type="success" @click="approveDoctor(scope.row)">通过</el-button>
+                    <el-button size="small" type="danger" @click="rejectDoctor(scope.row)">驳回</el-button>
+                  </div>
+                  <span v-else>无需操作</span>
+                </template>
+              </el-table-column>
+            </el-table>
+          </el-tab-pane>
+
+          <!-- 举报处理 -->
+          <el-tab-pane label="举报处理" name="report-handling">
+            <el-table :data="filteredReportList" style="width: 100%">
+              <el-table-column prop="reporter" label="举报人"></el-table-column>
+              <el-table-column prop="target" label="被举报对象"></el-table-column>
+              <el-table-column prop="type" label="举报类型">
+                 <template #header>
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span>举报类型</span>
+                    <el-input v-model="reportTypeSearch" placeholder="搜索..." size="small" style="width: 100px;" clearable></el-input>
+                  </div>
+                </template>
+              </el-table-column>
+              <el-table-column label="被举报内容">
+                <template #default="scope">
+                  <div v-if="scope.row.contentType === 'text'">{{ scope.row.content }}</div>
+                  <el-image v-if="scope.row.contentType === 'image'" style="width: 50px; height: 50px" :src="scope.row.content" :preview-src-list="[scope.row.content]"></el-image>
+                </template>
+              </el-table-column>
+              <el-table-column prop="status" label="状态">
+                  <template #header>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <span>状态</span>
+                      <el-select v-model="reportStatusFilter" size="small" style="width: 100px;">
+                        <el-option v-for="item in reportStatusOptions" :key="item" :label="item" :value="item" />
+                      </el-select>
+                    </div>
+                  </template>
+                  <template #default="scope">
+                      <el-tag :type="scope.row.status === '已处理' ? 'success' : (scope.row.status === '待处理' ? 'warning' : 'info')">{{ scope.row.status }}</el-tag>
+                  </template>
+              </el-table-column>
+              <el-table-column label="处理说明" width="180">
+                <template #default="scope">
+                  <el-input v-if="scope.row.status==='待处理'" v-model="scope.row.handleMsg" placeholder="请输入处理说明" size="small" />
+                  <span v-else>{{ scope.row.handleMsg }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="操作" width="180">
+                <template #default="scope">
+                  <div v-if="scope.row.status==='待处理'">
+                    <el-button size="small" type="primary" @click="handleReport(scope.row, true)">确认处理</el-button>
+                    <el-button size="small" @click="handleReport(scope.row, false)">取消举报</el-button>
+                  </div>
+                  <el-button v-else-if="scope.row.handleMsg" size="small" @click="viewHandleNote(scope.row.handleMsg)">查看说明</el-button>
+                  <span v-else>无需操作</span>
+                </template>
+              </el-table-column>
+            </el-table>
+          </el-tab-pane>
+
+          <!-- 数据统计 -->
+          <el-tab-pane label="数据统计" name="data-statistics">
+             <el-row :gutter="20">
+              <el-col :span="12">
+                <el-card>
+                  <div ref="dauChart" style="width: 100%; height: 400px;"></div>
+                </el-card>
+              </el-col>
+              <el-col :span="12">
+                <el-card>
+                  <div ref="consultationChart" style="width: 100%; height: 400px;"></div>
+                </el-card>
+              </el-col>
+            </el-row>
+          </el-tab-pane>
+        </el-tabs>
+      </el-main>
+    </el-container>
+  </div>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="https://unpkg.com/element-plus"></script>
+  <script src="admin-platform.js"></script>
+</body>
+</html> 
