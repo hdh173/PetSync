@@ -1,0 +1,217 @@
+/* 医生端主页 - 蓝色主题覆盖 */
+
+/* 沿用 selfcenter.css 的核心布局，仅覆盖颜色相关的部分 */
+@import url('selfcenter.css');
+
+/* 动作按钮和高亮元素的蓝色主题 */
+.save-button {
+  background: linear-gradient(to right, #1890ff, #40a9ff);
+  box-shadow: 0 2px 6px rgba(24, 144, 255, 0.3);
+}
+
+.save-button:hover {
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.4);
+}
+
+.security-icon {
+  color: #1890ff;
+  background: #e6f7ff;
+}
+
+.security-action {
+  color: #1890ff;
+}
+
+.security-action:hover {
+  background: #e6f7ff;
+  border-color: #91d5ff;
+}
+
+/* 覆盖 Element Plus 组件的主题色 */
+.el-button--primary {
+    --el-button-bg-color: #1890ff;
+    --el-button-border-color: #1890ff;
+    --el-button-hover-bg-color: #40a9ff;
+    --el-button-hover-border-color: #40a9ff;
+}
+
+.el-tag--success {
+    --el-color-success: #1890ff; /* 将"成功"状态也映射为蓝色主题 */
+    --el-color-success-light-9: #e6f7ff;
+}
+
+/* 覆盖原有的新增宠物按钮样式 */
+.add-button {
+    background: #1890ff; /* 替换掉棕色 */
+    box-shadow: 0 2px 6px rgba(24, 144, 255, 0.3);
+}
+
+.add-button:hover {
+    box-shadow: 0 4px 12px rgba(24, 144, 255, 0.4);
+}
+
+body, html {
+    margin: 0;
+    font-family: 'Microsoft YaHei', sans-serif;
+}
+
+.doctor-center {
+    width: 80%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(24,144,255,0.08);
+    margin-bottom: 20px;
+    padding: 24px;
+}
+
+.cus-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 16px;
+    margin-bottom: 20px;
+}
+
+.cus-card-header h2 {
+    margin: 0;
+    font-size: 20px;
+    color: #333;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+}
+
+.user-avatar {
+    flex-shrink: 0;
+}
+
+.user-details {
+    flex-grow: 1;
+    margin: 0 24px;
+}
+
+.user-details p {
+    margin: 0 0 8px 0;
+    color: #666;
+}
+
+.user-details strong {
+    font-size: 18px;
+    color: #333;
+}
+
+.user-stats {
+    display: flex;
+    gap: 32px;
+    text-align: center;
+}
+
+.user-stats span {
+    font-size: 24px;
+    font-weight: bold;
+    color: #1890ff;
+}
+
+.user-stats p {
+    margin: 4px 0 0 0;
+    font-size: 14px;
+    color: #999;
+}
+
+.qualification-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.qualification-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 16px;
+    border-left: 5px solid #ffc107; /* 待审核 */
+}
+
+.qualification-item.verified {
+    border-left-color: #28a745; /* 已认证 */
+}
+
+.qualification-item .icon {
+    font-size: 24px;
+    color: #28a745;
+    margin-right: 16px;
+}
+
+.qualification-item.pending .icon {
+    color: #ffc107;
+}
+
+.item-content {
+    display: flex;
+    align-items: center;
+}
+
+.item-details p {
+    margin: 0 0 4px 0;
+    font-size: 14px;
+    color: #666;
+}
+
+.item-details strong {
+    font-size: 16px;
+    color: #333;
+}
+
+/* 医生端自定义样式 */
+
+/* 顶栏颜色 */
+.el-menu-demo {
+    background-color: #1890ff !important;
+}
+
+/* 状态统计颜色 */
+.user-stats span {
+    color: #1890ff !important;
+}
+
+/* 资质认证状态颜色 */
+.pet-card.verified {
+    border-left-color: #28a745 !important; /* 已认证 */
+}
+
+.pet-card.pending {
+    border-left-color: #ffc107 !important; /* 待审核 */
+}
+
+.pet-card .icon {
+    color: #28a745;
+}
+
+.pet-card.pending .icon {
+    color: #ffc107;
+}
+
+.input-wrapper .el-tag {
+    margin-right: 8px;
+}
+
+.input-wrapper .button-new-tag {
+    height: 24px;
+    padding: 0 10px;
+    line-height: 22px;
+}
+
+.input-wrapper .el-input--small {
+    width: 100px;
+} 
+ 

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>管理员个人中心</title>
+  <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+  <!-- 复用医生主页的样式，因为主题色一致 -->
+  <link rel="stylesheet" href="doctor-profile.css">
+</head>
+<body>
+  <div id="app">
+    <el-container>
+      <!-- 标准化顶栏 -->
+      <el-header style="padding:0;">
+        <el-menu 
+          :default-active="activeIndex"
+          mode="horizontal" 
+          background-color="#1890ff" 
+          text-color="#fff" 
+          active-text-color="#ffd04b" 
+          style="border-bottom:none;"
+          @select="handleSelect"
+        >
+          <el-menu-item index="0" style="font-size: 20px; font-weight: bold;cursor:default;background:transparent!important;">PetSync</el-menu-item>
+          <div style="flex-grow: 1;"></div>
+          <el-menu-item index="1">审核中心</el-menu-item>
+          <el-menu-item index="2">个人中心</el-menu-item>
+          <el-menu-item index="3" style="cursor: default; background: transparent !important;">欢迎您，{{ userInfo.username }}</el-menu-item>
+          <el-menu-item index="4">退出</el-menu-item>
+        </el-menu>
+      </el-header>
+
+      <el-main>
+        <div class="user-center">
+          <!-- 基本信息 -->
+          <div class="card">
+            <div class="cus-card-header">
+              <h2>我的信息</h2>
+            </div>
+            <div class="info">
+              <div class="avatar-section">
+                <div class="avatar-container">
+                  <img :src="userInfo.avatar" alt="管理员头像" class="avatar" />
+                </div>
+              </div>
+              <div class="details">
+                <div class="info-item">
+                  <p class="label">用户名：</p>
+                  <div class="input-wrapper">
+                    <el-input v-model="userInfo.username" class="input-box" readonly />
+                  </div>
+                </div>
+                <div class="info-item">
+                  <p class="label">角色：</p>
+                  <div class="input-wrapper">
+                    <el-tag type="success" size="large">{{ userInfo.role }}</el-tag>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 数据显示 -->
+          <div class="card">
+            <div class="cus-card-header">
+              <h2>平台数据概览</h2>
+            </div>
+            <el-row :gutter="20" style="text-align:center;">
+              <el-col :span="6" v-for="stat in stats" :key="stat.title">
+                <el-card shadow="hover">
+                  <div style="font-size:16px; color:#606266; margin-bottom:10px;">{{ stat.title }}</div>
+                  <div style="font-size:24px; font-weight:bold; color:#303133;">{{ stat.value }}</div>
+                </el-card>
+              </el-col>
+            </el-row>
+          </div>
+
+          <!-- 安全中心 -->
+          <div class="card">
+            <h2>安全中心</h2>
+            <div class="security-item">
+              <div class="security-info">
+                <i class="security-icon">🔒</i>
+                <div>
+                  <p class="security-title">登录密码</p>
+                  <p class="security-desc">定期更改密码以确保账户安全</p>
+                </div>
+              </div>
+              <button class="security-action">更改</button>
+            </div>
+            <div class="security-item">
+              <div class="security-info">
+                <i class="security-icon">🚪</i>
+                <div>
+                  <p class="security-title">退出登录</p>
+                  <p class="security-desc">安全退出当前账号</p>
+                </div>
+              </div>
+              <button class="security-action" @click="handleSelect('4')">退出</button>
+            </div>
+          </div>
+        </div>
+      </el-main>
+    </el-container>
+  </div>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="https://unpkg.com/element-plus"></script>
+  <script src="admin-profile.js"></script>
+</body>
+</html> 
