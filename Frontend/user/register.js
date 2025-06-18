@@ -8,10 +8,8 @@ const app = createApp({
         const countdown = ref(0);
         const emailError = ref('');
         const confirmPasswordError = ref('');
-        const passwordStrength = ref('');
-        const passwordStrengthText = ref('');
         const showLogin = ref(true);
-        const defaultAvatar = ref('https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png');
+        //const defaultAvatar = ref('https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png');
         const loginWarningVisible = ref(false);
 
         const registerForm = ref({
@@ -36,6 +34,17 @@ const app = createApp({
             checkRegisterFormValidity();
         };
 
+        const isPasswordValid = ref(false);
+        const passwordWarning = ref(false);
+
+        function validPassword(password) {
+            const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
+            isPasswordValid.value = regex.test(password);
+            passwordWarning.value = !isPasswordValid.value;
+            checkRegisterFormValidity();
+        };
+
+
         const validateConfirmPassword = () => {
             confirmPasswordError.value = registerForm.value.password !== registerForm.value.confirmPassword
                 ? '密码不一致'
@@ -48,7 +57,7 @@ const app = createApp({
                 registerForm.value.username &&
                 isEmailValid.value &&
                 registerForm.value.verificationCode &&
-                registerForm.value.password &&
+                isPasswordValid.value &&
                 registerForm.value.confirmPassword &&
                 confirmPasswordError.value === ''
             );
@@ -74,19 +83,6 @@ const app = createApp({
             }
         };
 
-        const handleRegister = async () => {
-            const { username, email, verificationCode, password } = registerForm.value;
-
-            try {
-                await register({ username, email, verificationCode, password });
-                alert('注册成功，请登录');
-                switchToLogin();
-            } catch (err) {
-                console.error('注册失败', err);
-                alert('注册失败，请重试');
-            }
-        };
-
         const currentUser = reactive({
             id: 101,
             name: 'IvanPun',
@@ -100,11 +96,33 @@ const app = createApp({
             avatarFile: null
         });
 
+        const handleRegister = async () => {
+            const { username, email, verificationCode, password } = registerForm.value;
+
+            /*try {
+                await register({ username, email, verificationCode, password });
+                alert('注册成功，请登录');
+                switchToLogin();
+            } catch (err) {
+                console.error('注册失败', err);
+                alert('注册失败，请重试');
+            }*/
+            ElementPlus.ElMessage({
+                message: '注册成功',
+                type: 'success',
+                plain: true,
+            });
+            localStorage.setItem('loginState', true);
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            window.location.href = 'index.html';
+        };
+
         const handleLogin = async () => {
             const { usernameOrEmail, password } = loginForm.value;
 
             if (usernameOrEmail == 'admin' && password == 'admin') {
                 localStorage.setItem('loginState', true);
+                console.log(currentUser);
                 localStorage.setItem('currentUser', JSON.stringify(currentUser));
                 window.location.href = 'index.html';
             } else {
@@ -137,7 +155,7 @@ const app = createApp({
             if (savedUser) {
                 Object.assign(currentUser, JSON.parse(savedUser));
             }
-            
+
         }
 
         onMounted(() => {
@@ -160,12 +178,12 @@ const app = createApp({
             sendVerificationCodeHandler,
             emailError,
             validateConfirmPassword,
-            passwordStrength,
-            passwordStrengthText,
             isRegisterDisabled,
             confirmPasswordError,
             handleRegister,
-            loginWarningVisible
+            loginWarningVisible,
+            validPassword,
+            passwordWarning
         };
     }
 });

@@ -110,6 +110,6 @@ button[type="submit"]:disabled {
   text-decoration: underline;
 }
 
-.login-warning{
+.login-warning, .error-msg, .red-text{
   color: #e53935;
 }

@@ -289,7 +289,7 @@ const app = createApp({
             requestNotificationPermission();
 
             // 🕒 自定義目標時間：2025-06-13 10:30
-            const targetTime = new Date("2025-06-13T00:05:00");
+            const targetTime = new Date("2025-06-19T03:42:00");
             scheduleNotificationAt(targetTime);
         });
 

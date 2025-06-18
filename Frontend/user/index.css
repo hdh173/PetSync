@@ -226,7 +226,7 @@ body {
 
 .post-btn:hover:not(:disabled) {
   background-color: #6D4C41;
-  cursor: not-allowed;
+  cursor: pointer;
 }
 
 .post-btn:disabled {
@@ -677,6 +677,12 @@ body {
 
 .recommend-tag:hover {
   background: #D7CCC8;
+}
+
+.recommend-tag.selected {
+  background-color: #6D4C41; /* 被選中後的顏色，例如亮橙色 */
+  color: white;
+  font-weight: bold;
 }
 
 /* 加载状态 */

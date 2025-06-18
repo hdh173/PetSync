@@ -6,6 +6,9 @@
     <link rel="stylesheet"
       href="https://unpkg.com/element-plus/dist/index.css" />
       <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+      <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
     <link rel="stylesheet" href="global.css">
     <link rel="stylesheet" href="index.css">
   </head>
@@ -68,7 +71,7 @@
               <div class="main-content">
                 <!-- 发布动态区域 -->
                 <div class="post-editor">
-                  <textarea v-model="postContent"
+                  <textarea v-model="draftPost.textContent"
                     placeholder="分享你的想法..."></textarea>
 
                   <!-- 图片预览区域 -->
@@ -77,9 +80,9 @@
                     <button class="remove-image" @click="removeImage">×</button>
                   </div>
 
-                  <div class="selected-tags" v-if="selectedTags.length > 0">
+                  <div class="selected-tags" v-if="draftPost.tags.length > 0">
                     <span class="tag selected"
-                      v-for="(tag, index) in selectedTags" :key="tag">
+                      v-for="(tag, index) in draftPost.tags" :key="tag">
                       #{{ tag }}
                       <span class="remove-tag"
                         @click="removeTag(index)">×</span>
@@ -106,12 +109,12 @@
                         <div class="tag-dropdown" v-if="showTagDropdown"
                           ref="tagDropdown">
                           <span class="tag" v-for="tag in moreTags"
-                            @click="selectTag(tag)" :key="tag">#{{ tag }}</span>
+                            @click="addTag(tag)" :key="tag">#{{ tag }}</span>
                         </div>
                       </div>
                     </div>
                     <button class="post-btn" @click="submitPost"
-                      :disabled="!postContent.trim() && selectedTags.length === 0 && !previewImage">发布</button>
+                      :disabled="!draftPost.textContent.trim() && draftPost.tags.length === 0 && !previewImage">发布</button>
                   </div>
                 </div>
 
@@ -120,11 +123,11 @@
                   <div class="filter-header">
                     <h3>动态筛选</h3>
                     <div class="filter-controls">
-                      <button class="nav-button" @click="scrollUsers(-1)"
+                      <button class="nav-button" @click=""
                         :disabled="isScrollLeft">
                         <i class="icon-arrow">←</i>
                       </button>
-                      <button class="nav-button" @click="scrollUsers(1)"
+                      <button class="nav-button" @click=""
                         :disabled="isScrollRight">
                         <i class="icon-arrow">→</i>
                       </button>
@@ -168,6 +171,7 @@
                         v-if="post.author.id !== currentUser.id">
                         {{ post.author.isFollowing ? '已关注' : '关注' }}
                       </button>
+                      <span><i class="bi bi-trash-fill" v-if="post.author.id == currentUser.id"  @click="removePost(post.id)" style="cursor: pointer;"></i></span>
                     </div>
                     <div class="post-tags"
                       v-if="post.tags && post.tags.length > 0">
@@ -242,8 +246,8 @@
                   <button class="search-button" @click="searchTag()">搜索</button>
                 </div>
                 <div class="recommend-list">
-                  <div class="recommend-tag" v-for="tag in recommendedTags"
-                    :key="tag" @click="viewTag(tag)">
+                  <div class="recommend-tag" :class="{ selected: selectedTags.includes(tag) }" v-for="tag in recommendedTags"
+                    :key="tag" @click="toggleTag(tag)">
                     #{{ tag }}
                   </div>
                 </div>

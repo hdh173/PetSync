@@ -7,22 +7,36 @@ const app = createApp({
         const linkList = ['index.html', 'selfcenter.html', 'index.html', 'event.html', 'consult.html', 'selfcenter.html'];
         const websites = ref(['主页', '个人中心', '主页', '事件簿', '咨询服务', '个人中心']);
         const defaultAvatar = ref('https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png');
-        const postContent = ref('');
-        const selectedTags = ref([]);
+        const loading = ref(false);
+        const error = ref(false);
+        const isScrollLeft = ref(true);
+        const isScrollRight = ref(false);
         const visibleTags = ref([
-            '萌寵日常', '養寵技巧', '寵物健康', '寵物飲食', '寵物美容'
+            '萌宠日常', '养宠技巧', '宠物健康', '宠物饮食', '宠物美容'
         ]);
 
         const moreTags = ref([
-            '貓咪行為', '狗狗訓練', '寵物醫療', '異寵飼養', '寵物心理',
-            '疫苗與驅蟲', '寵物保險', '寵物領養', '走失協尋', '寵物配對',
-            '寵物用品', '寵物攝影', '寵物旅遊', '寵物趣事', '寵物老年照護'
+            '猫咪行为', '狗狗训练', '宠物医疗', '异宠饲养', '宠物心理',
+            '疫苗与驱虫', '宠物保险', '宠物领养', '走失协寻', '宠物配对',
+            '宠物用品', '宠物摄影', '宠物旅游', '宠物趣事', '宠物老年照护'
         ]);
 
         const recommendedTags = ref([
-            '萌寵日常', '寵物健康', '貓咪行為', '狗狗訓練',
-            '寵物醫療', '寵物美容', '走失協尋', '寵物領養'
+            '萌宠日常', '养宠技巧', '宠物健康', '宠物饮食', '宠物美容',
+            '猫咪行为', '狗狗训练', '宠物医疗', '异宠饲养', '宠物心理',
+            '疫苗与驱虫', '宠物保险', '宠物领养', '走失协寻', '宠物配对',
+            '宠物用品', '宠物摄影', '宠物旅游', '宠物趣事', '宠物老年照护'
         ]);
+        const selectedTags = ref([]);
+        const toggleTag = (tag) => {
+            const index = selectedTags.value.indexOf(tag);
+            if (index === -1) {
+                selectedTags.value.push(tag);
+            } else {
+                selectedTags.value.splice(index, 1); // 再次點擊則取消
+            }
+        };
+
         const showTagDropdown = ref(false);
         const selectedUser = ref(null);
         function selectUser(userId) {
@@ -41,8 +55,8 @@ const app = createApp({
                     isFollowing: true
                 },
                 textContent: '今天带猫咪去洗澡，它超乖的～ 🐱🛁',
-                tags: ['宠物', '日常', '猫奴'],
-                time: new Date(new Date().getTime() - 1000 * 60 * 60), // 1 小时前
+                tags: ['萌宠日常', '猫咪行为', '宠物美容', '宠物心理', '养宠技巧'],
+                time: new Date(new Date().getTime() - 1000 * 60 * 60),
                 likes: 12,
                 commentCount: 2,
                 coins: 1,
@@ -80,8 +94,8 @@ const app = createApp({
                 },
                 textContent: '刚买了新狗粮试试看，它居然全吃光了！😲🐶',
                 image: '/images/dogFood.jpg',
-                tags: ['狗狗', '生活分享'],
-                time: new Date(new Date().getTime() - 1000 * 60 * 90), // 1.5 小时前
+                tags: ['狗狗训练', '宠物饮食', '宠物健康', '疫苗与驱虫', '宠物用品'],
+                time: new Date(new Date().getTime() - 1000 * 60 * 90),
                 likes: 20,
                 commentCount: 0,
                 coins: 3,
@@ -99,8 +113,8 @@ const app = createApp({
                     isFollowing: true
                 },
                 textContent: '天气真好，来公园晒太阳☀️ #放松',
-                tags: ['日常', '阳光', '散步'],
-                time: new Date(new Date().getTime() - 1000 * 60 * 10), // 10 分钟前
+                tags: ['宠物趣事', '宠物旅游', '萌宠日常'],
+                time: new Date(new Date().getTime() - 1000 * 60 * 10),
                 likes: 5,
                 commentCount: 1,
                 coins: 0,
@@ -118,8 +132,95 @@ const app = createApp({
                         }
                     }
                 ]
+            },
+            {
+                id: 4,
+                author: {
+                    id: 104,
+                    name: 'Luna',
+                    avatar: 'https://i.pravatar.cc/150?img=7',
+                    isFollowing: false
+                },
+                textContent: '我家龙猫终于学会自己用厕所了！太感动了～',
+                tags: ['异宠饲养', '宠物趣事', '养宠技巧', '宠物心理'],
+                time: new Date(),
+                likes: 8,
+                commentCount: 1,
+                coins: 1,
+                isLiked: false,
+                isCoined: false,
+                showComments: false,
+                comments: [
+                    {
+                        id: 204,
+                        text: '也太聪明了吧！',
+                        time: new Date(),
+                        user: {
+                            name: 'Amy',
+                            avatar: 'https://i.pravatar.cc/150?img=8'
+                        }
+                    }
+                ]
+            },
+            {
+                id: 5,
+                author: {
+                    id: 105,
+                    name: 'Tommy',
+                    avatar: 'https://i.pravatar.cc/150?img=9',
+                    isFollowing: true
+                },
+                textContent: '今天带狗狗去打疫苗，医生说它身体超棒！',
+                tags: ['狗狗训练', '宠物医疗', '疫苗与驱虫', '宠物健康', '宠物保险'],
+                time: new Date(),
+                likes: 14,
+                commentCount: 0,
+                coins: 2,
+                isLiked: true,
+                isCoined: false,
+                showComments: false,
+                comments: []
+            },
+            {
+                id: 6,
+                author: {
+                    id: 106,
+                    name: 'Sophie',
+                    avatar: 'https://i.pravatar.cc/150?img=10',
+                    isFollowing: false
+                },
+                textContent: '参加了一次宠物摄影课程，拍出超多萌照📸📷',
+                tags: ['宠物摄影', '萌宠日常', '宠物用品'],
+                time: new Date(),
+                likes: 18,
+                commentCount: 2,
+                coins: 1,
+                isLiked: false,
+                isCoined: true,
+                showComments: false,
+                comments: [
+                    {
+                        id: 205,
+                        text: '照片太可爱了！求分享！',
+                        time: new Date(),
+                        user: {
+                            name: 'Mia',
+                            avatar: 'https://i.pravatar.cc/150?img=11'
+                        }
+                    },
+                    {
+                        id: 206,
+                        text: '想看更多！',
+                        time: new Date(),
+                        user: {
+                            name: 'Leo',
+                            avatar: 'https://i.pravatar.cc/150?img=12'
+                        }
+                    }
+                ]
             }
         ]);
+
 
         const filterUsers = computed(() => {
             const seen = new Set();
@@ -133,11 +234,17 @@ const app = createApp({
         });
 
         const filteredPosts = computed(() => {
-            if (!selectedUser.value) {
-                return postsData.value;
-            }
-            return postsData.value.filter(post => post.author.id === selectedUser.value);
+            return postsData.value
+                .filter(post => {
+                    const matchUser = !selectedUser.value || post.author.id === selectedUser.value;
+                    const matchTags = selectedTags.value.length === 0 ||
+                        post.tags.some(tag => selectedTags.value.includes(tag));
+                    return matchUser && matchTags;
+                })
+                .sort((a, b) => b.time - a.time);  // 按时间降序排列，最新的在前面
         });
+
+
 
 
         // 格式化时间
@@ -151,6 +258,7 @@ const app = createApp({
         };
 
         const toggleTagDropdown = () => {
+            showTagDropdown.value = !showTagDropdown.value
         };
 
         const toggleLike = async (post) => {
@@ -258,8 +366,98 @@ const app = createApp({
             }
         };
 
-        const submitPost = () => {
+        const draftPost = reactive(
+            {
+                id: Date.now(),
+                author: {
+                    id: 0,
+                    name: '',
+                    avatar: '',
+                    isFollowing: true
+                },
+                textContent: '',
+                image: '',
+                tags: [],
+                time: new Date(),
+                likes: 0,
+                commentCount: 0,
+                coins: 0,
+                isLiked: false,
+                isCoined: false,
+                showComments: false,
+                comments: []
+            }
+        );
 
+        // 图片上传相关
+        const previewImage = ref(null);
+        const imageFile = ref(null);
+
+        const handleImageUpload = (e) => {
+            const file = e.target.files[0]
+            if (file) {
+                if (file.size > 10 * 1024 * 1024) {
+                    ElementPlus.ElMessage.error('图片大小不能超过10MB');
+                    return
+                }
+                imageFile.value = file
+                previewImage.value = URL.createObjectURL(file)
+            }
+        };
+
+        const removeImage = () => {
+            previewImage.value = null
+            imageFile.value = null
+        };
+
+        const addTag = (tag) => {
+            if (draftPost.tags.length >= 5) {
+                ElementPlus.ElMessage({
+                    message: '最多只能添加5个标签',
+                    type: 'warning',
+                })
+                return
+            }
+            if (!draftPost.tags.includes(tag)) {
+                draftPost.tags.push(tag)
+            }
+        }
+
+        const removeTag = (index) => {
+            draftPost.tags.splice(index, 1)
+        }
+
+        const submitPost = () => {
+            draftPost.author = {
+                id: currentUser.id,
+                name: currentUser.name,
+                avatar: currentUser.avatar,
+                isFollowing: true
+            };
+            draftPost.image = previewImage.value;
+            postsData.value.unshift({ ...draftPost });
+            draftPost.id = Date.now();
+            draftPost.textContent = '';
+            draftPost.tags = [];
+            draftPost.time = new Date();
+        };
+
+        const removePost = (postID) => {
+            ElementPlus.ElMessageBox.confirm(
+                '是否要删除动态？',
+                '警告',
+                {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning',
+                }
+            )
+                .then(() => {
+                    postsData.value = postsData.value.filter(post => post.id !== postID);
+                })
+                .catch(() => {
+
+                })
         };
 
         function fetchDataAndUpdateLocalStorage() {
@@ -267,7 +465,7 @@ const app = createApp({
             if (savedUser) {
                 Object.assign(currentUser, JSON.parse(savedUser));
             }
-            
+
         };
 
         onMounted(() => {
@@ -279,8 +477,6 @@ const app = createApp({
             activeIndex,
             handleSelect,
             defaultAvatar,
-            postContent,
-            selectedTags,
             visibleTags,
             showTagDropdown,
             moreTags,
@@ -297,7 +493,20 @@ const app = createApp({
             toggleCoin,
             addComment,
             postsData,
-            submitPost
+            submitPost,
+            removePost,
+            draftPost,
+            addTag,
+            removeTag,
+            loading,
+            error,
+            isScrollLeft,
+            isScrollRight,
+            handleImageUpload,
+            previewImage,
+            removeImage,
+            selectedTags,
+            toggleTag
         };
     }
 });

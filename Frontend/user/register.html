@@ -115,9 +115,10 @@
                       id="password"
                       v-model="registerForm.password"
                       required
-                      @input="validatePassword" />
-                    <div class="password-strength" :class="passwordStrength">
-                      包含、大小写字母及数字；长度不小于8
+                      @input="validPassword"
+                      @blur="validPassword" />
+                    <div :class="{ 'red-text': passwordWarning }">
+                      包含、大小写字母及数字;长度不小于8
                     </div>
                   </div>
 
