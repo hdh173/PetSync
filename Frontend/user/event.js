@@ -3,14 +3,15 @@ const { createApp, ref, onMounted, reactive, computed } = Vue;
 const app = createApp({
     setup() {
         window.auth.isLoggedIn();
-        const activeIndex = ref('2');
-        const linkList = ['index.html', 'index.html', 'event.html', 'consult.html', 'selfcenter.html'];
-        const websites = ref(['主页', '主页', '事件簿', '咨询服务', '个人中心']);
+        const activeIndex = ref('3');
+        const linkList = ['index.html', 'selfcenter.html', 'index.html', 'event.html', 'consult.html', 'selfcenter.html'];
+        const websites = ref(['主页', '个人中心', '主页', '事件簿', '咨询服务', '个人中心']);
         const newDialogVisible = ref(false);
         const petFilter = ref('全部');
         const inputWarning = ref(false);
         const detailDialogVisible = ref(false);
         const removeAlertVisible = ref(false);
+        const currentUser = reactive({});
         const repeatOptions = ref([
             {
                 value: '每年',
@@ -275,7 +276,16 @@ const app = createApp({
             }
         };
 
+        function fetchDataAndUpdateLocalStorage() {
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                Object.assign(currentUser, JSON.parse(savedUser));
+            }
+            
+        };
+
         onMounted(() => {
+            fetchDataAndUpdateLocalStorage();
             requestNotificationPermission();
 
             // 🕒 自定義目標時間：2025-06-13 10:30
@@ -304,7 +314,8 @@ const app = createApp({
             confirmRemoveEvent,
             removeAlertVisible,
             sortOrder,
-            sortOptions
+            sortOptions,
+            currentUser
         };
     }
 });

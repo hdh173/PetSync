@@ -803,3 +803,21 @@ select.edit-input {
   color: #fff;
 }
 
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.stat-item:hover {
+  background: #f0f2f5;
+}
+
+.stat-number {
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--text-color);
+}

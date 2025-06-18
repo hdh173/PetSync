@@ -1,4 +1,4 @@
-const { createApp, ref } = Vue;
+const { createApp, ref, onMounted, reactive } = Vue;
 
 const app = createApp({
     setup() {
@@ -11,6 +11,7 @@ const app = createApp({
         const passwordStrength = ref('');
         const passwordStrengthText = ref('');
         const showLogin = ref(true);
+        const defaultAvatar = ref('https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png');
         const loginWarningVisible = ref(false);
 
         const registerForm = ref({
@@ -86,13 +87,27 @@ const app = createApp({
             }
         };
 
+        const currentUser = reactive({
+            id: 101,
+            name: 'IvanPun',
+            avatar: 'images/user_icon.jpg',
+            followedCount: 826,
+            followingCount: 1142,
+            postCount: 1,
+            signature: "",
+            gender: "男",
+            location: "",
+            avatarFile: null
+        });
+
         const handleLogin = async () => {
             const { usernameOrEmail, password } = loginForm.value;
 
             if (usernameOrEmail == 'admin' && password == 'admin') {
                 localStorage.setItem('loginState', true);
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
                 window.location.href = 'index.html';
-            }else{
+            } else {
                 loginWarningVisible.value = true;
             }
 
@@ -116,6 +131,18 @@ const app = createApp({
         const switchToLogin = () => {
             showLogin.value = true;
         };
+
+        function fetchDataAndUpdateLocalStorage() {
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                Object.assign(currentUser, JSON.parse(savedUser));
+            }
+            
+        }
+
+        onMounted(() => {
+            fetchDataAndUpdateLocalStorage()
+        })
 
 
         return {

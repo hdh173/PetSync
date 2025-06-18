@@ -3,10 +3,10 @@ const { createApp, ref, nextTick, computed, onMounted, reactive, watch } = Vue;
 const app = createApp({
     setup() {
         window.auth.isLoggedIn();
-        const activeIndex = ref('3');
-        const linkList = ['index.html', 'index.html', 'event.html', 'consult.html', 'selfcenter.html'];
-        const websites = ref(['主页', '主页', '事件簿', '咨询服务', '个人中心']);
-
+        const activeIndex = ref('4');
+        const linkList = ['index.html', 'selfcenter.html', 'index.html', 'event.html', 'consult.html', 'selfcenter.html'];
+        const websites = ref(['主页', '个人中心', '主页', '事件簿', '咨询服务', '个人中心']);
+        const currentUser = reactive({});
         const newMessage = ref('');
         const isWaitingResponse = ref(false);
 
@@ -146,62 +146,39 @@ const app = createApp({
         };
 
         // API 数据
-        const specialties = ref([{ name: '狗狗' },
-        { name: '猫咪' },
-        { name: '仓鼠' },
-        { name: '鹦鹉' }]);
-        const filteredExperts = ref([
-            {
-                name: '李小猫',
-                avatar: 'https://api.dicebear.com/8.x/pixel-art/svg?seed=CatExpert1',
-                introduction: '资深猫咪行为分析师，擅长处理猫咪焦虑与攻击行为。',
-                rating: 4.8,
-                hospital: '上海宠爱动物医院',
-                education: '华东师范大学 动物心理学硕士',
-                specialties: ['猫咪行为调整', '焦虑干预', '攻击行为管理'],
-                consultations: 312
-            },
-            {
-                name: '张旺旺',
-                avatar: 'https://api.dicebear.com/8.x/pixel-art/svg?seed=DogExpert1',
-                introduction: '拥有十年犬类心理研究经验，熟悉各种犬种的行为管理。',
-                rating: 4.6,
-                hospital: '北京幸福犬宠物中心',
-                education: '中国农业大学 动物行为学博士',
-                specialties: ['犬类行为训练', '习惯培养', '服从训练'],
-                consultations: 415
-            },
-            {
-                name: '陈羽毛',
-                avatar: 'https://api.dicebear.com/8.x/pixel-art/svg?seed=BirdExpert1',
-                introduction: '擅长解决鸟类宠物的应激反应问题，耐心细致。',
-                rating: 4.9,
-                hospital: '广州小羽宠物诊所',
-                education: '南京林业大学 野生动物与生态学本科',
-                specialties: ['鸟类情绪干预', '社交习惯训练', '应激反应缓解'],
-                consultations: 168
-            },
-            {
-                name: '王喵喵',
-                avatar: 'https://api.dicebear.com/8.x/pixel-art/svg?seed=CatExpert2',
-                introduction: '宠物心理咨询师，精通猫咪适应新环境的训练与陪伴。',
-                rating: 4.7,
-                hospital: '深圳安心宠物医院',
-                education: '中山大学 心理学学士',
-                specialties: ['环境适应', '孤独症状', '亲密关系建立'],
-                consultations: 289
-            },
-            {
-                name: '赵哈士奇',
-                avatar: 'https://api.dicebear.com/8.x/pixel-art/svg?seed=DogExpert2',
-                introduction: '专注犬只分离焦虑的干预方法，擅长建立主人与宠物之间的信任。',
-                rating: 4.5,
-                hospital: '成都友爱动物诊所',
-                education: '四川农业大学 宠物行为硕士',
-                specialties: ['分离焦虑', '信任建立', '行为矫正'],
-                consultations: 354
-            }
+        const specialties = ref([
+            { name: '狗狗' },
+            { name: '猫咪' },
+            { name: '仓鼠' },
+            { name: '鹦鹉' },
+            { name: '兔子' },
+            { name: '爬行类' },
+            { name: '水族动物' },
+            { name: '乌龟' },
+            { name: '龙猫' },
+            { name: '蜜袋鼯' },
+            { name: '异宠护理' },
+            { name: '宠物行为训练' },
+            { name: '宠物营养' },
+            { name: '宠物心理' },
+            { name: '宠物医疗' },
+            { name: '老年宠物照护' },
+            { name: '流浪动物救助' },
+            { name: '宠物美容' },
+            { name: '宠物繁育' },
+            { name: '宠物安乐' }
         ]);
+
+        const filteredExperts = computed(() => {
+            if (selectedTags.value.length === 0) {
+                return consultants.value
+            }
+
+            return consultants.value.filter(expert =>
+                expert.specialties.some(spec => selectedTags.value.includes(spec))
+            )
+        })
+
 
         const detailExpert = reactive(
             {
@@ -217,7 +194,109 @@ const app = createApp({
             }
         );
 
-        const consultants = ref([]);
+        const consultants = ref([
+            {
+                name: '李小猫',
+                avatar: 'https://api.dicebear.com/8.x/pixel-art/svg?seed=CatExpert1',
+                introduction: '资深猫咪行为分析师，擅长处理猫咪焦虑与攻击行为。',
+                rating: 4.8,
+                hospital: '上海宠爱动物医院',
+                education: '华东师范大学 动物心理学硕士',
+                specialties: ['猫咪', '宠物心理'],
+                consultations: 312
+            },
+            {
+                name: '张旺旺',
+                avatar: 'https://api.dicebear.com/8.x/pixel-art/svg?seed=DogExpert1',
+                introduction: '拥有十年犬类心理研究经验，熟悉各种犬种的行为管理。',
+                rating: 4.6,
+                hospital: '北京幸福犬宠物中心',
+                education: '中国农业大学 动物行为学博士',
+                specialties: ['狗狗', '宠物行为训练'],
+                consultations: 415
+            },
+            {
+                name: '陈羽毛',
+                avatar: 'https://api.dicebear.com/8.x/pixel-art/svg?seed=BirdExpert1',
+                introduction: '擅长解决鸟类宠物的应激反应问题，耐心细致。',
+                rating: 4.9,
+                hospital: '广州小羽宠物诊所',
+                education: '南京林业大学 野生动物与生态学本科',
+                specialties: ['鹦鹉', '宠物心理'],
+                consultations: 168
+            },
+            {
+                name: '王喵喵',
+                avatar: 'https://api.dicebear.com/8.x/pixel-art/svg?seed=CatExpert2',
+                introduction: '宠物心理咨询师，精通猫咪适应新环境的训练与陪伴。',
+                rating: 4.7,
+                hospital: '深圳安心宠物医院',
+                education: '中山大学 心理学学士',
+                specialties: ['猫咪', '宠物心理'],
+                consultations: 289
+            },
+            {
+                name: '赵哈士奇',
+                avatar: 'https://api.dicebear.com/8.x/pixel-art/svg?seed=DogExpert2',
+                introduction: '专注犬只分离焦虑的干预方法，擅长建立主人与宠物之间的信任。',
+                rating: 4.5,
+                hospital: '成都友爱动物诊所',
+                education: '四川农业大学 宠物行为硕士',
+                specialties: ['狗狗', '宠物心理', '宠物行为训练'],
+                consultations: 354
+            },
+            {
+                name: '林仓仓',
+                avatar: 'https://api.dicebear.com/8.x/pixel-art/svg?seed=HamsterExpert1',
+                introduction: '小型啮齿类护理专家，擅长仓鼠健康管理与环境适应。',
+                rating: 4.4,
+                hospital: '杭州萌宠天地',
+                education: '浙江大学 动物营养与护理本科',
+                specialties: ['仓鼠', '宠物营养'],
+                consultations: 237
+            },
+            {
+                name: '苏跳跳',
+                avatar: 'https://api.dicebear.com/8.x/pixel-art/svg?seed=RabbitExpert1',
+                introduction: '专注兔子行为与健康，多年异宠护理经验。',
+                rating: 4.7,
+                hospital: '武汉可爱兔宠物医院',
+                education: '华中农业大学 异宠护理硕士',
+                specialties: ['兔子', '异宠护理'],
+                consultations: 198
+            },
+            {
+                name: '钱甲鱼',
+                avatar: 'https://api.dicebear.com/8.x/pixel-art/svg?seed=TurtleExpert1',
+                introduction: '擅长水龟陆龟照护，提供专业的水族环境搭配建议。',
+                rating: 4.6,
+                hospital: '南京水宠中心',
+                education: '南京农业大学 水族动物学硕士',
+                specialties: ['乌龟', '水族动物'],
+                consultations: 163
+            },
+            {
+                name: '周小蛇',
+                avatar: 'https://api.dicebear.com/8.x/pixel-art/svg?seed=SnakeExpert1',
+                introduction: '从事爬行类动物行为研究，尤擅蜥蜴与蛇类日常护理。',
+                rating: 4.3,
+                hospital: '重庆异宠研究所',
+                education: '西南大学 爬行类生态硕士',
+                specialties: ['爬行类', '异宠护理'],
+                consultations: 152
+            },
+            {
+                name: '艾心心',
+                avatar: 'https://api.dicebear.com/8.x/pixel-art/svg?seed=PetPsychologist1',
+                introduction: '专注宠物心理疏导与老年宠物照护，关注情绪与陪伴。',
+                rating: 4.9,
+                hospital: '上海安宁动物医院',
+                education: '北京大学 心理学博士',
+                specialties: ['宠物心理', '老年宠物照护'],
+                consultations: 301
+            }
+        ]);
+
 
         // 搜索和筛选
         const selectedTags = ref([]);
@@ -472,6 +551,18 @@ const app = createApp({
             scrollToBottom();
         });
 
+        function fetchDataAndUpdateLocalStorage() {
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                Object.assign(currentUser, JSON.parse(savedUser));
+            }
+
+        };
+
+        onMounted(() => {
+            fetchDataAndUpdateLocalStorage();
+        });
+
         return {
             activeIndex,
             handleSelect,
@@ -514,7 +605,8 @@ const app = createApp({
             disabledDate,
             loading,
             filteredHistory,
-            pagedHistory
+            pagedHistory,
+            currentUser
         };
     }
 });

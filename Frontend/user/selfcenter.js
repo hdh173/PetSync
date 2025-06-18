@@ -1,11 +1,11 @@
-const { createApp, ref, reactive } = Vue;
+const { createApp, ref, reactive, onMounted } = Vue;
 
 const app = createApp({
     setup() {
         window.auth.isLoggedIn();
-        const activeIndex = ref('4');
-        const linkList = ['index.html', 'index.html', 'event.html', 'consult.html', 'selfcenter.html'];
-        const websites = ref(['主页', '主页', '事件簿', '咨询服务', '个人中心']);
+        const activeIndex = ref('5');
+        const linkList = ['index.html', 'selfcenter.html', 'index.html', 'event.html', 'consult.html', 'selfcenter.html'];
+        const websites = ref(['主页', '个人中心', '主页', '事件簿', '咨询服务', '个人中心']);
         const defaultAvatar = ref('https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png');
         const cities_sample = [
             '北京', '上海', '广州', '深圳', '杭州', '成都', '重庆', '武汉',
@@ -37,12 +37,15 @@ const app = createApp({
             }
         }
 
-        const userInfo = reactive({
-            username: "",
+        const currentUser = reactive({
+            id: 0,
+            name: '',
+            avatar: '',
+            followedCount: 0,
+            followingCount: 0,
+            postCount: 0,
             signature: "",
-            gender: "男",
-            occupation: "",
-            avatar: defaultAvatar.value,
+            gender: "",
             location: "",
             avatarFile: null
         });
@@ -63,7 +66,7 @@ const app = createApp({
             const reader = new FileReader();
             reader.onload = () => {
                 let targetObj = null;
-                if (target === 'user') targetObj = userInfo;
+                if (target === 'user') targetObj = currentUser;
                 else if (target === 'new') targetObj = newPet;
                 else if (typeof target === 'number') targetObj = petProfiles[target];
 
@@ -169,9 +172,28 @@ const app = createApp({
             newPet.avatarFile = null;
         }
 
-        function handleLogout(){
+        function handleLogout() {
             window.auth.logout();
         }
+
+        const saveChanges = () => {
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            ElementPlus.ElMessage({
+                message: '保存成功！',
+                type: 'success',
+            })
+        };
+
+        function fetchDataAndUpdateLocalStorage() {
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                Object.assign(currentUser, JSON.parse(savedUser));
+            }
+        }
+
+        onMounted(() => {
+            fetchDataAndUpdateLocalStorage();
+        })
 
 
         return {
@@ -183,7 +205,6 @@ const app = createApp({
             websites,
             triggerFileInput,
             handleFileUpload,
-            userInfo,
             userFileInput,
             newPetFileInput,
             petFileInputs,
@@ -194,7 +215,9 @@ const app = createApp({
             dialogVisible,
             newPet,
             confirmAddPet,
-            handleLogout
+            handleLogout,
+            currentUser,
+            saveChanges
         };
     }
 });

@@ -22,21 +22,21 @@
                 <el-container>
                     <el-header>
                         <el-menu
-                            :default-active="activeIndex"
-                            class="el-menu-demo"
-                            mode="horizontal"
-                            text-color="#faebd7"
-                            :ellipsis="false"
-                            @select="handleSelect">
-                            <el-menu-item index="0">
-                                <h1>PetSync</h1>
-                            </el-menu-item>
-                            <el-menu-item
-                                v-for="(website, index) in websites.slice(1, 5)"
-                                :key="website.index"
-                                :index="(index + 1).toString()"><h3 class="menu-title">{{ website
+              :default-active="activeIndex"
+              class="el-menu-demo"
+              mode="horizontal"
+              text-color="#faebd7"
+              :ellipsis="false"
+              @select="handleSelect">
+              <el-menu-item index="0">
+                <h1>PetSync</h1>
+              </el-menu-item>
+              <el-menu-item index="1">
+                <h3>Hello, 用户{{currentUser.name}}</h3>
+              </el-menu-item>
+              <el-menu-item v-for="(website, index) in websites.slice(2, 6)" :key="website.index" :index="(index + 2).toString()"><h3 class="menu-title">{{ website
                 }}</h3></el-menu-item>
-                        </el-menu>
+            </el-menu>
                     </el-header>
                     <el-main>
 

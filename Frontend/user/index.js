@@ -1,11 +1,11 @@
-const { createApp, ref } = Vue;
+const { createApp, ref, computed, onMounted, reactive } = Vue;
 
 const app = createApp({
     setup() {
         window.auth.isLoggedIn();
-        const activeIndex = ref('1');
-        const linkList = ['index.html', 'index.html', 'event.html', 'consult.html', 'selfcenter.html'];
-        const websites = ref(['主页', '主页', '事件簿', '咨询服务', '个人中心']);
+        const activeIndex = ref('2');
+        const linkList = ['index.html', 'selfcenter.html', 'index.html', 'event.html', 'consult.html', 'selfcenter.html'];
+        const websites = ref(['主页', '个人中心', '主页', '事件簿', '咨询服务', '个人中心']);
         const defaultAvatar = ref('https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png');
         const postContent = ref('');
         const selectedTags = ref([]);
@@ -24,29 +24,25 @@ const app = createApp({
             '寵物醫療', '寵物美容', '走失協尋', '寵物領養'
         ]);
         const showTagDropdown = ref(false);
-        const filterUsers = ref([]);
         const selectedUser = ref(null);
+        function selectUser(userId) {
+            selectedUser.value = (selectedUser.value === userId) ? null : userId;
+        }
+
         // 当前用户数据
-        const currentUser = ref({
-            id: 101,
-            name: '加载中...',
-            avatar: '',
-            followedCount: 0,
-            followingCount: 0,
-            postCount: 0
-        })
-        const filteredPosts = ref([
+        const currentUser = reactive({});
+        const postsData = ref([
             {
                 id: 1,
                 author: {
                     id: 101,
-                    name: 'Alice',
-                    avatar: 'https://i.pravatar.cc/150?img=1',
+                    name: 'IvanPun',
+                    avatar: 'images/user_icon.jpg',
                     isFollowing: true
                 },
-                textContent: '今天帶貓咪去洗澡，牠超乖的～ 🐱🛁',
-                tags: ['寵物', '日常', '貓奴'],
-                time: new Date(new Date().getTime() - 1000 * 60 * 60), // 1 小時前
+                textContent: '今天带猫咪去洗澡，它超乖的～ 🐱🛁',
+                tags: ['宠物', '日常', '猫奴'],
+                time: new Date(new Date().getTime() - 1000 * 60 * 60), // 1 小时前
                 likes: 12,
                 commentCount: 2,
                 coins: 1,
@@ -56,7 +52,7 @@ const app = createApp({
                 comments: [
                     {
                         id: 201,
-                        text: '看起來好乾淨！',
+                        text: '看起来好干净！',
                         time: new Date(new Date().getTime() - 1000 * 60 * 40),
                         user: {
                             name: 'Ben',
@@ -65,7 +61,7 @@ const app = createApp({
                     },
                     {
                         id: 202,
-                        text: '你是在哪裡洗的呀？',
+                        text: '你是在哪里洗的呀？',
                         time: new Date(new Date().getTime() - 1000 * 60 * 20),
                         user: {
                             name: 'Carol',
@@ -82,10 +78,10 @@ const app = createApp({
                     avatar: 'https://i.pravatar.cc/150?img=4',
                     isFollowing: false
                 },
-                textContent: '剛買了新狗糧試試看，牠居然全吃光了！😲🐶',
-                image: '/images/dog-food.jpg',
+                textContent: '刚买了新狗粮试试看，它居然全吃光了！😲🐶',
+                image: '/images/dogFood.jpg',
                 tags: ['狗狗', '生活分享'],
-                time: new Date(new Date().getTime() - 1000 * 60 * 90), // 1.5 小時前
+                time: new Date(new Date().getTime() - 1000 * 60 * 90), // 1.5 小时前
                 likes: 20,
                 commentCount: 0,
                 coins: 3,
@@ -102,9 +98,9 @@ const app = createApp({
                     avatar: 'https://i.pravatar.cc/150?img=5',
                     isFollowing: true
                 },
-                textContent: '天氣好好，來公園曬太陽☀️ #放鬆',
-                tags: ['日常', '陽光', '散步'],
-                time: new Date(new Date().getTime() - 1000 * 60 * 10), // 10 分鐘前
+                textContent: '天气真好，来公园晒太阳☀️ #放松',
+                tags: ['日常', '阳光', '散步'],
+                time: new Date(new Date().getTime() - 1000 * 60 * 10), // 10 分钟前
                 likes: 5,
                 commentCount: 1,
                 coins: 0,
@@ -114,7 +110,7 @@ const app = createApp({
                 comments: [
                     {
                         id: 203,
-                        text: '真羨慕！我還在辦公室 😭',
+                        text: '真羡慕！我还在办公室 😭',
                         time: new Date(new Date().getTime() - 1000 * 60 * 5),
                         user: {
                             name: 'Frank',
@@ -124,6 +120,25 @@ const app = createApp({
                 ]
             }
         ]);
+
+        const filterUsers = computed(() => {
+            const seen = new Set();
+            return postsData.value
+                .map(post => post.author)
+                .filter(author => {
+                    if (seen.has(author.id)) return false;
+                    seen.add(author.id);
+                    return true;
+                });
+        });
+
+        const filteredPosts = computed(() => {
+            if (!selectedUser.value) {
+                return postsData.value;
+            }
+            return postsData.value.filter(post => post.author.id === selectedUser.value);
+        });
+
 
         // 格式化时间
         const formatTime = (date) => {
@@ -219,7 +234,7 @@ const app = createApp({
                     text: post.newComment,
                     time: new Date()
                 });
-                
+
                 post.commentCount += 1;
                 post.newComment = ''
             } catch (err) {
@@ -243,6 +258,22 @@ const app = createApp({
             }
         };
 
+        const submitPost = () => {
+
+        };
+
+        function fetchDataAndUpdateLocalStorage() {
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                Object.assign(currentUser, JSON.parse(savedUser));
+            }
+            
+        };
+
+        onMounted(() => {
+            fetchDataAndUpdateLocalStorage();
+        });
+
         return {
             websites,
             activeIndex,
@@ -257,13 +288,16 @@ const app = createApp({
             toggleTagDropdown,
             filterUsers,
             selectedUser,
+            selectUser,
             filteredPosts,
             formatTime,
             currentUser,
             toggleLike,
             handleCommentClick,
             toggleCoin,
-            addComment
+            addComment,
+            postsData,
+            submitPost
         };
     }
 });
