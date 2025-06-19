@@ -70,7 +70,7 @@ const app = createApp({
                         time: new Date(new Date().getTime() - 1000 * 60 * 40),
                         user: {
                             name: 'Ben',
-                            avatar: 'https://i.pravatar.cc/150?img=2'
+                            avatar: 'images/2.jpg'
                         }
                     },
                     {
@@ -79,7 +79,7 @@ const app = createApp({
                         time: new Date(new Date().getTime() - 1000 * 60 * 20),
                         user: {
                             name: 'Carol',
-                            avatar: 'https://i.pravatar.cc/150?img=3'
+                            avatar: 'images/3.jpg'
                         }
                     }
                 ]
@@ -89,7 +89,7 @@ const app = createApp({
                 author: {
                     id: 102,
                     name: 'David',
-                    avatar: 'https://i.pravatar.cc/150?img=4',
+                    avatar: 'images/4.jpg',
                     isFollowing: false
                 },
                 textContent: '刚买了新狗粮试试看，它居然全吃光了！😲🐶',
@@ -109,7 +109,7 @@ const app = createApp({
                 author: {
                     id: 103,
                     name: 'Emma',
-                    avatar: 'https://i.pravatar.cc/150?img=5',
+                    avatar: 'images/5.jpg',
                     isFollowing: true
                 },
                 textContent: '天气真好，来公园晒太阳☀️ #放松',
@@ -128,7 +128,7 @@ const app = createApp({
                         time: new Date(new Date().getTime() - 1000 * 60 * 5),
                         user: {
                             name: 'Frank',
-                            avatar: 'https://i.pravatar.cc/150?img=6'
+                            avatar: 'images/6.jpg'
                         }
                     }
                 ]
@@ -138,7 +138,7 @@ const app = createApp({
                 author: {
                     id: 104,
                     name: 'Luna',
-                    avatar: 'https://i.pravatar.cc/150?img=7',
+                    avatar: 'images/7.jpg',
                     isFollowing: false
                 },
                 textContent: '我家龙猫终于学会自己用厕所了！太感动了～',
@@ -157,7 +157,7 @@ const app = createApp({
                         time: new Date(),
                         user: {
                             name: 'Amy',
-                            avatar: 'https://i.pravatar.cc/150?img=8'
+                            avatar: 'images/8.jpg'
                         }
                     }
                 ]
@@ -167,7 +167,7 @@ const app = createApp({
                 author: {
                     id: 105,
                     name: 'Tommy',
-                    avatar: 'https://i.pravatar.cc/150?img=9',
+                    avatar: 'images/9.jpg',
                     isFollowing: true
                 },
                 textContent: '今天带狗狗去打疫苗，医生说它身体超棒！',
@@ -186,7 +186,7 @@ const app = createApp({
                 author: {
                     id: 106,
                     name: 'Sophie',
-                    avatar: 'https://i.pravatar.cc/150?img=10',
+                    avatar: 'images/10.jpg',
                     isFollowing: false
                 },
                 textContent: '参加了一次宠物摄影课程，拍出超多萌照📸📷',
@@ -205,7 +205,7 @@ const app = createApp({
                         time: new Date(),
                         user: {
                             name: 'Mia',
-                            avatar: 'https://i.pravatar.cc/150?img=11'
+                            avatar: 'images/11.jpg'
                         }
                     },
                     {
@@ -214,7 +214,7 @@ const app = createApp({
                         time: new Date(),
                         user: {
                             name: 'Leo',
-                            avatar: 'https://i.pravatar.cc/150?img=12'
+                            avatar: 'images/12.jpg'
                         }
                     }
                 ]
