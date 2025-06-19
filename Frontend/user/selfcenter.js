@@ -93,8 +93,8 @@ const app = createApp({
         });
 
         const rawList = [
-            { name: "豬咪", type: "貓", gender: "女", birthDay: "2023-01-01", petId: "A001", avatarFile: null, avatar: defaultAvatar.value },
-            { name: "豆豆", type: "狗", gender: "男", birthDay: "2022-07-15", petId: "A002", avatarFile: null, avatar: defaultAvatar.value },
+            { name: "豬咪", type: "貓", gender: "女", birthDay: "2023-01-01", petId: "A001", avatarFile: null, avatar: 'images/cat.jpg' },
+            { name: "豆豆", type: "狗", gender: "男", birthDay: "2022-07-15", petId: "A002", avatarFile: null, avatar: 'images/dog.jpg' },
         ];
 
         rawList.forEach(data => {
